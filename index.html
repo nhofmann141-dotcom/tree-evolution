@@ -3,579 +3,458 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tree Evolution</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#101812;color:white;font-family:Arial,sans-serif;overflow:hidden}
-#game{position:fixed;inset:0}
-canvas{display:block;width:100%;height:100%;touch-action:none}
-.hud{position:absolute;top:12px;left:8px;right:8px;display:flex;gap:5px;z-index:5}
-.stat{background:#17251de8;border:1px solid #526b50;border-radius:12px;padding:9px 5px;text-align:center;flex:1;min-width:0}
-.stat small{display:block;color:#a9c29e;font-size:10px}
-.stat strong{font-size:15px}
-.xpbox{position:absolute;top:81px;left:12%;width:76%;height:9px;background:#263328;border-radius:20px;overflow:hidden;z-index:5}
-#xpbar{height:100%;width:0;background:linear-gradient(90deg,#7da85b,#d0d78a)}
-#leveltext{position:absolute;top:96px;width:100%;text-align:center;font-size:11px;color:#d5e2cc;z-index:5}
-#message{position:absolute;top:120px;left:0;right:0;text-align:center;color:#e4edcf;font-weight:bold;z-index:5;text-shadow:0 2px 5px black;padding:0 10px;font-size:13px}
-.actions{position:absolute;bottom:18px;left:0;right:0;display:flex;justify-content:center;gap:7px;z-index:6;flex-wrap:wrap;padding:0 7px}
-button{border:1px solid #728b64;background:#263d2c;color:white;border-radius:13px;padding:12px 13px;font-size:13px;font-weight:bold;cursor:pointer;touch-action:manipulation}
-button:active{transform:scale(.96)}
-button:disabled{opacity:.5}
-#water{background:#597d43;border-color:#9ab47a;padding:15px 22px;font-size:16px}
-.panel{display:none;position:absolute;z-index:10;left:4%;right:4%;top:15%;max-height:72%;overflow:auto;background:#17251df7;border:1px solid #71866a;border-radius:18px;padding:16px;box-shadow:0 10px 40px #000b}
-.panel h2{margin:0 0 8px}
-.sub{font-size:12px;color:#b9cbb2;margin-bottom:12px}
-.item{border-bottom:1px solid #405442;padding:13px 0}
-.itemtop{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.item button{padding:9px 11px;white-space:nowrap}
-.item small{color:#b9cbb2;display:block;margin-top:5px;line-height:1.5}
-.close{margin-top:14px}
-.progress{height:6px;background:#354536;border-radius:10px;margin-top:8px;overflow:hidden}
-.progress div{height:100%;background:#a4c77d}
-.adminInput{width:100%;padding:12px;margin:8px 0;background:#101812;color:white;border:1px solid #71866a;border-radius:10px;font-size:16px}
-.adminButton{width:100%;margin:5px 0;background:#354f38}
+body{margin:0;background:#101b17;color:#f1ead7;font-family:Arial,sans-serif;overflow-x:hidden}
+header{height:65px;background:#17251f;border-bottom:1px solid #52634d;display:flex;align-items:center;justify-content:space-around;padding:5px;position:relative;z-index:5}
+.stat{text-align:center;font-weight:bold;font-size:13px}
+.stat span{display:block;color:#e8c875;font-size:17px;margin-top:4px}
+#adminButton{background:#34463a;color:white;border:1px solid #8a9c79;border-radius:10px;padding:10px;font-size:18px}
+#scene{width:100%;height:57vh;min-height:350px;display:block}
+#game{position:relative;background:linear-gradient(#182a25,#263d2b);overflow:hidden}
+#levelbar{height:8px;background:#293b30;margin:0 15px;border-radius:10px;overflow:hidden}
+#xpbar{height:100%;width:0;background:#d9bd69;transition:width .3s}
+#controls{padding:12px;text-align:center;background:#17251f}
+button{cursor:pointer;border:0;border-radius:10px;padding:12px 16px;font-weight:bold}
+#water{background:#d5b65f;color:#1c2419;font-size:17px;width:90%;max-width:320px;padding:16px}
+#message{height:22px;color:#e8cf83;margin:8px}
+.panels{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;padding:10px}
+.panel{background:#24372c;border:1px solid #53674b;border-radius:12px;padding:12px;text-align:center}
+.panel button{background:#c9ac62;color:#182018;margin-top:8px;width:100%}
+h3{margin:4px 0 10px;color:#e7ce8d}
+.small{font-size:12px;color:#c4c9b9}
+.modal{display:none;position:fixed;inset:0;background:#000b;z-index:20;align-items:center;justify-content:center;padding:18px}
+.modalbox{width:100%;max-width:380px;background:#1b2b22;border:1px solid #a38b51;border-radius:15px;padding:20px;max-height:85vh;overflow:auto}
+.modalbox input{width:100%;padding:12px;border-radius:8px;border:1px solid #78866d;margin:7px 0;background:#101b17;color:white}
+.modalbox button{margin:5px 0;width:100%;background:#c9ac62;color:#182018}
+.close{background:#58665b!important;color:white!important}
+.item{padding:10px;background:#304337;border-radius:9px;margin:7px 0}
+#toast{position:fixed;bottom:15px;left:50%;transform:translateX(-50%);background:#d3b766;color:#172018;padding:10px 18px;border-radius:20px;display:none;z-index:30}
 </style>
 </head>
 <body>
-<div id="game"></div>
 
-<div class="hud">
- <div class="stat"><small>🪙 MÜNZEN</small><strong id="coins">0</strong></div>
- <div class="stat"><small>⭐ LEVEL</small><strong id="level">1</strong></div>
- <div class="stat"><small>🌱 XP</small><strong id="xp">0/100</strong></div>
-</div>
-<div class="xpbox"><div id="xpbar"></div></div>
-<div id="leveltext"></div>
-<div id="message">Dein Baum wartet auf Wasser 🌳</div>
+<header>
+ <div class="stat">🪙 MÜNZEN<span id="coins">0</span></div>
+ <div class="stat">⭐ LEVEL<span id="level">1</span></div>
+ <div class="stat">💧 XP<span id="xp">0</span></div>
+ <button id="adminButton" onclick="openAdmin()">⚙️</button>
+</header>
 
-<div class="actions">
- <button id="water">💧 Gießen</button>
- <button id="shopBtn">🛒 Shop</button>
- <button id="inventoryBtn">🎒 Inventar</button>
- <button id="treesBtn">🌳 Bäume</button>
+<div id="game">
+ <div style="padding:8px 15px 5px;text-align:center;font-size:12px;color:#d8c783">LEVEL-FORTSCHRITT</div>
+ <div id="levelbar"><div id="xpbar"></div></div>
+ <canvas id="scene"></canvas>
 </div>
 
-<div class="panel" id="shop">
- <h2>🛒 Gießkannen-Shop</h2>
- <div class="sub">Verbessere deine Gießkanne bis Level 50.</div>
- <div id="shopItems"></div>
- <button class="close" onclick="closePanels()">Schließen</button>
+<div id="controls">
+ <button id="water" onclick="waterTree()">💧 BAUM GIESSEN</button>
+ <div id="message">Dein Baum wartet auf Wasser!</div>
 </div>
 
-<div class="panel" id="inventory">
- <h2>🎒 Deine Gießkannen</h2>
- <div id="inventoryItems"></div>
- <button class="close" onclick="closePanels()">Schließen</button>
+<div class="panels">
+ <div class="panel">
+  <h3>🛒 Shop</h3>
+  <div class="small">Kaufe neue Gießkannen</div>
+  <button onclick="openShop()">SHOP ÖFFNEN</button>
+ </div>
+ <div class="panel">
+  <h3>🎒 Inventar</h3>
+  <div class="small">Deine Gießkannen verwalten</div>
+  <button onclick="openInventory()">INVENTAR</button>
+ </div>
+ <div class="panel">
+  <h3>🌳 Bäume</h3>
+  <div class="small">Entdecke neue Baumarten</div>
+  <button onclick="openTrees()">SAMMLUNG</button>
+ </div>
+ <div class="panel">
+  <h3>⬆️ Gießkanne</h3>
+  <div class="small">Verbessere deine Kanne</div>
+  <button onclick="upgradeCan()">UPGRADE</button>
+ </div>
 </div>
 
-<div class="panel" id="trees">
- <h2>🌳 Baum-Sammlung</h2>
- <div id="treeItems"></div>
- <button class="close" onclick="closePanels()">Schließen</button>
+<div class="modal" id="adminModal">
+ <div class="modalbox">
+  <h3>⚙️ ADMIN-BEREICH</h3>
+  <div id="adminLogin">
+   <p>Admin-Code eingeben:</p>
+   <input id="adminCode" type="password" placeholder="Admin-Code">
+   <button onclick="checkAdmin()">ENTSPERREN</button>
+  </div>
+  <div id="adminTools" style="display:none">
+   <p>Admin-Steuerung</p>
+   <input id="setCoins" type="number" placeholder="Münzen setzen">
+   <button onclick="giveCoins()">MÜNZEN SETZEN</button>
+   <input id="setLevel" type="number" placeholder="Level setzen">
+   <button onclick="giveLevel()">LEVEL SETZEN</button>
+   <button onclick="maxEverything()">ALLES FREISCHALTEN</button>
+   <button onclick="giveLots()">1 MILLIARDE MÜNZEN</button>
+  </div>
+  <button class="close" onclick="closeModal('adminModal')">SCHLIESSEN</button>
+ </div>
 </div>
 
-<div class="panel" id="admin">
- <h2>🔐 Besitzer-Menü</h2>
- <div class="sub">Admin-Steuerung</div>
- <label>Spielerlevel einstellen:</label>
- <input class="adminInput" id="adminLevelInput" type="number" min="1" max="1000000" value="100">
- <button class="adminButton" id="setLevelBtn">⭐ Level übernehmen</button>
- <button class="adminButton" id="maxLevelBtn">🚀 Level 1.000.000</button>
- <button class="adminButton" id="moneyBtn">🪙 Sehr viel Geld</button>
- <button class="adminButton" id="allUnlockBtn">🔓 Alle Gießkannen freischalten</button>
- <button class="adminButton" id="maxCansBtn">💧 Alle Gießkannen Level 50</button>
- <button class="adminButton" id="everythingBtn">👑 ALLES FREISCHALTEN</button>
- <button class="close" onclick="closePanels()">Schließen</button>
+<div class="modal" id="shopModal">
+ <div class="modalbox">
+  <h3>🛒 GIESSKANNEN-SHOP</h3>
+  <div id="shopItems"></div>
+  <button class="close" onclick="closeModal('shopModal')">SCHLIESSEN</button>
+ </div>
 </div>
+
+<div class="modal" id="inventoryModal">
+ <div class="modalbox">
+  <h3>🎒 DEINE GIESSKANNEN</h3>
+  <div id="inventoryItems"></div>
+  <button class="close" onclick="closeModal('inventoryModal')">SCHLIESSEN</button>
+ </div>
+</div>
+
+<div class="modal" id="treesModal">
+ <div class="modalbox">
+  <h3>🌳 BAUM-SAMMLUNG</h3>
+  <div id="treeItems"></div>
+  <button class="close" onclick="closeModal('treesModal')">SCHLIESSEN</button>
+ </div>
+</div>
+
+<div id="toast"></div>
 
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
-const container=document.getElementById('game');
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x111b18);
-scene.fog=new THREE.Fog(0x111b18,18,40);
+const saved = JSON.parse(localStorage.getItem('treeEvolutionSave') || '{}');
+let coins = saved.coins ?? 0;
+let level = saved.level ?? 1;
+let xp = saved.xp ?? 0;
+let owned = saved.owned ?? [0];
+let selected = saved.selected ?? 0;
+let canLevels = saved.canLevels ?? {};
+let unlockedTrees = saved.unlockedTrees ?? [0];
 
-const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,100);
-camera.position.set(0,5.2,12);
-camera.lookAt(0,2.1,0);
+const cans = [
+ {name:'Eichen-Kanne',emoji:'🪣',price:0,power:10},
+ {name:'Engel-Kanne',emoji:'😇',price:1500,power:25},
+ {name:'Teufel-Kanne',emoji:'😈',price:8000,power:55},
+ {name:'Candy-Kanne',emoji:'🍬',price:30000,power:100},
+ {name:'Kristall-Kanne',emoji:'💎',price:100000,power:190},
+ {name:'Gold-Kanne',emoji:'👑',price:350000,power:350},
+ {name:'Galaxy-Kanne',emoji:'🌌',price:1200000,power:650},
+ {name:'Drachen-Kanne',emoji:'🐉',price:5000000,power:1200},
+ {name:'Sternen-Kanne',emoji:'🌟',price:20000000,power:2500},
+ {name:'Götter-Kanne',emoji:'✨',price:100000000,power:6000}
+];
 
-const renderer=new THREE.WebGLRenderer({antialias:true});
+const trees = [
+ {name:'Eichenbaum',level:1,color:0x315b32},
+ {name:'Candybaum',level:3,color:0xb76b9c},
+ {name:'Engelbaum',level:5,color:0xe5dfbd},
+ {name:'Teufelsbaum',level:8,color:0x702c28},
+ {name:'Kristallbaum',level:12,color:0x66b9bd},
+ {name:'Goldbaum',level:16,color:0xc6a33d},
+ {name:'Galaxybaum',level:20,color:0x544b91},
+ {name:'Eisbaum',level:25,color:0x9bd6df},
+ {name:'Feuerbaum',level:30,color:0xb84c27},
+ {name:'Regenbogenbaum',level:40,color:0x9c76b8}
+];
+
+function save(){
+ localStorage.setItem('treeEvolutionSave',JSON.stringify({
+ coins,level,xp,owned,selected,canLevels,unlockedTrees
+ }));
+}
+function needXP(){return Math.floor(100*Math.pow(1.2,Math.min(level-1,300)))}
+function power(){
+ let c=cans[selected];
+ return Math.floor(c.power*Math.pow(1.12,(canLevels[selected]||1)-1));
+}
+function update(){
+ document.getElementById('coins').textContent=coins.toLocaleString('de-DE');
+ document.getElementById('level').textContent=level.toLocaleString('de-DE');
+ document.getElementById('xp').textContent=xp.toLocaleString('de-DE')+' / '+needXP().toLocaleString('de-DE');
+ document.getElementById('xpbar').style.width=Math.min(100,xp/needXP()*100)+'%';
+ save();
+ updateTree();
+}
+function notify(t){
+ let el=document.getElementById('toast');
+ el.textContent=t;el.style.display='block';
+ setTimeout(()=>el.style.display='none',1800);
+}
+
+// THREE-DIMENSIONAL WORLD
+const canvas=document.getElementById('scene');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-renderer.setSize(innerWidth,innerHeight);
+renderer.setSize(innerWidth,canvas.clientHeight);
 renderer.shadowMap.enabled=true;
-container.appendChild(renderer.domElement);
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 
-scene.add(new THREE.HemisphereLight(0xc8dfc4,0x283522,2.2));
-const sun=new THREE.DirectionalLight(0xe0edcf,2.5);
-sun.position.set(-4,9,5);
-sun.castShadow=true;
-scene.add(sun);
+const scene=new THREE.Scene();
+scene.fog=new THREE.Fog(0x182a25,15,35);
+const camera=new THREE.PerspectiveCamera(45,innerWidth/canvas.clientHeight,.1,100);
+camera.position.set(0,5.3,12);
+camera.lookAt(0,2,0);
 
-const fill=new THREE.PointLight(0x789b70,1.2,18);
-fill.position.set(2,4,4);
-scene.add(fill);
+scene.add(new THREE.HemisphereLight(0xb8c9b1,0x263326,2));
+const moonLight=new THREE.DirectionalLight(0xffe8bd,2.5);
+moonLight.position.set(-5,9,6);
+moonLight.castShadow=true;
+scene.add(moonLight);
 
 const ground=new THREE.Mesh(
- new THREE.CircleGeometry(9,64),
- new THREE.MeshStandardMaterial({color:0x263d2b,roughness:1})
+ new THREE.CircleGeometry(7,64),
+ new THREE.MeshStandardMaterial({color:0x314c31,roughness:1})
 );
 ground.rotation.x=-Math.PI/2;
-ground.position.y=-.08;
+ground.position.y=-.12;
 ground.receiveShadow=true;
 scene.add(ground);
 
 const island=new THREE.Mesh(
- new THREE.CylinderGeometry(5.5,5.9,.45,64),
- new THREE.MeshStandardMaterial({color:0x314b32,roughness:1})
+ new THREE.CylinderGeometry(6.9,6.5,.45,64),
+ new THREE.MeshStandardMaterial({color:0x273b29,roughness:1})
 );
-island.position.y=-.32;
+island.position.y=-.4;
 island.receiveShadow=true;
 scene.add(island);
 
 const moon=new THREE.Mesh(
- new THREE.SphereGeometry(.65,32,32),
- new THREE.MeshBasicMaterial({color:0xd8dfbd})
+ new THREE.SphereGeometry(1.05,32,32),
+ new THREE.MeshBasicMaterial({color:0xe7dfbd})
 );
-moon.position.set(-4.5,6,-5);
+moon.position.set(-5,7,-9);
 scene.add(moon);
 
-// Hintergrundbäume
-for(let i=0;i<18;i++){
- const h=2+Math.random()*3;
- const group=new THREE.Group();
- const trunk=new THREE.Mesh(
-  new THREE.CylinderGeometry(.12,.22,h,7),
-  new THREE.MeshStandardMaterial({color:0x30251c})
- );
- trunk.position.y=h/2;
- group.add(trunk);
- const leaves=new THREE.Mesh(
-  new THREE.ConeGeometry(.9,h*.65,7),
-  new THREE.MeshStandardMaterial({color:0x18291e})
- );
- leaves.position.y=h*.85;
- group.add(leaves);
- const a=Math.random()*Math.PI*2;
- const r=7+Math.random()*3;
- group.position.set(Math.cos(a)*r,0,Math.sin(a)*r-2);
- scene.add(group);
-}
-
-const palettes=[
- [0x315b32,0x416b38],
- [0xd85c9c,0xf5a6d4],
- [0xe8d8a1,0xffffff],
- [0x5a1723,0x9d2635],
- [0x58d9e6,0xa9f8ff],
- [0xd5a52b,0xffdf76],
- [0x392c78,0x8069d8],
- [0x9bdcf0,0xe4faff],
- [0xe85b26,0xffa12e],
- [0x66d7a1,0xd0ff9c]
-];
-
-const treeNames=['Eichenbaum','Candy Tree','Engelbaum','Teufelsbaum','Kristallbaum','Goldbaum','Galaxy-Baum','Eisbaum','Feuerbaum','Regenbogenbaum'];
-const unlocks=[1,3,5,8,12,16,20,25,30,40];
-
-const cans=[
- {name:'Eichen-Kanne',price:0,power:10,color:0x9aaf91},
- {name:'Engel-Kanne',price:1500,power:25,color:0xe8dfb9},
- {name:'Teufel-Kanne',price:8000,power:55,color:0x9e3030},
- {name:'Candy-Kanne',price:30000,power:100,color:0xe879b2},
- {name:'Kristall-Kanne',price:100000,power:190,color:0x62d9e9},
- {name:'Gold-Kanne',price:350000,power:350,color:0xe4b735},
- {name:'Galaxy-Kanne',price:1200000,power:650,color:0x8069d8},
- {name:'Drachen-Kanne',price:5000000,power:1200,color:0xc44b32},
- {name:'Sternen-Kanne',price:20000000,power:2500,color:0x9cbaff},
- {name:'Götter-Kanne',price:100000000,power:6000,color:0xffe4a0}
-];
-
-let state={coins:0,level:1,xp:0,can:0,owned:[0],canLevels:Array(10).fill(1)};
-try{
- const old=JSON.parse(localStorage.getItem('treeEvolutionSave'));
- if(old)state={...state,...old};
-}catch(e){}
-
-if(!Array.isArray(state.owned))state.owned=[0];
-if(!Array.isArray(state.canLevels))state.canLevels=Array(10).fill(1);
-for(let i=0;i<10;i++){
- state.canLevels[i]=Math.max(1,Math.min(50,Number(state.canLevels[i])||1));
-}
-if(!state.owned.includes(0))state.owned.push(0);
-if(!Number.isFinite(state.level)||state.level<1)state.level=1;
-if(!Number.isFinite(state.xp)||state.xp<0)state.xp=0;
-if(!Number.isFinite(state.coins)||state.coins<0)state.coins=0;
-if(!state.owned.includes(state.can))state.can=0;
-
-function xpNeeded(){
- return Math.floor(100*Math.pow(1.2,Math.min(state.level-1,300)));
-}
-function canLevel(i){return state.canLevels[i]||1}
-function canPower(i){return Math.floor(cans[i].power*(1+(canLevel(i)-1)*.12))}
-function upgradeCost(i){return Math.floor(100*Math.pow(i+1,1.65)*Math.pow(canLevel(i),1.55))}
-function currentTreeIndex(){
- let index=0;
- for(let i=0;i<unlocks.length;i++)if(state.level>=unlocks[i])index=i;
- return index;
-}
-function save(){
- try{localStorage.setItem('treeEvolutionSave',JSON.stringify(state))}catch(e){}
-}
-
 const treeGroup=new THREE.Group();
-treeGroup.position.set(0,0,0);
 scene.add(treeGroup);
 
-// Baum wird immer sichtbar in der Mitte erstellt
 function makeTree(){
  treeGroup.clear();
-
- const colors=palettes[currentTreeIndex()];
- const bark=new THREE.MeshStandardMaterial({color:0x503522,roughness:1});
- const bark2=new THREE.MeshStandardMaterial({color:0x795337,roughness:1});
- const leafMaterials=[
-  new THREE.MeshStandardMaterial({color:colors[0],roughness:.85}),
-  new THREE.MeshStandardMaterial({color:colors[1],roughness:.85})
- ];
-
- function addMesh(geometry,material,x,y,z,rx=0,ry=0,rz=0){
-  const mesh=new THREE.Mesh(geometry,material);
-  mesh.position.set(x,y,z);
-  mesh.rotation.set(rx,ry,rz);
-  mesh.castShadow=true;
-  mesh.receiveShadow=true;
-  treeGroup.add(mesh);
-  return mesh;
- }
-
- // Stamm
- addMesh(new THREE.CylinderGeometry(.38,.58,2.9,16),bark,0,1.45,0);
-
- // Stammrinde
- for(let i=0;i<8;i++){
-  const a=i*Math.PI/4;
-  addMesh(
-   new THREE.CylinderGeometry(.025,.035,2.2,6),
-   bark2,
-   Math.cos(a)*.34,1.45,Math.sin(a)*.34
-  );
- }
-
- // Wurzeln
- for(let i=0;i<8;i++){
-  const a=i*Math.PI/4;
-  addMesh(
-   new THREE.CylinderGeometry(.035,.2,1.2,9),
-   bark,
-   Math.cos(a)*.48,.27,Math.sin(a)*.48,
-   Math.sin(a)*.85,0,Math.cos(a)*-.85
-  );
- }
-
- // Äste
- for(let i=0;i<9;i++){
-  const a=i*Math.PI*2/9;
-  addMesh(
-   new THREE.CylinderGeometry(.05,.15,1.45,9),
-   bark,
-   Math.cos(a)*.62,2.2,Math.sin(a)*.62,
-   Math.sin(a)*.7,0,Math.cos(a)*-.7
-  );
- }
-
- // Große runde Krone
- const crown=[
-  [0,3.65,0,1.05],
-  [-.75,3.5,0,.88],
-  [.75,3.5,0,.88],
-  [0,3.5,.75,.88],
-  [0,3.5,-.75,.88],
-  [-.55,4.25,.25,.85],
-  [.55,4.25,-.25,.85],
-  [0,4.55,0,.85],
-  [-1.05,3.95,-.2,.72],
-  [1.05,3.95,.2,.72],
-  [0,3.95,1.05,.72],
-  [0,3.95,-1.05,.72],
-  [-.65,3.1,.55,.68],
-  [.65,3.1,-.55,.68]
- ];
-
- crown.forEach((p,i)=>{
-  addMesh(
-   new THREE.IcosahedronGeometry(p[3],2),
-   leafMaterials[i%2],
-   p[0],p[1],p[2]
-  );
+ const bark=new THREE.MeshStandardMaterial({color:0x493325,roughness:.95});
+ const leaves=new THREE.MeshStandardMaterial({
+  color:trees[treeType()].color,roughness:.85
  });
+ const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.28,.48,3.2,12),bark);
+ trunk.position.y=1.55;
+ trunk.castShadow=true;
+ treeGroup.add(trunk);
 
- const progress=Math.min(1,state.xp/xpNeeded());
- treeGroup.scale.setScalar(.72+progress*.58);
+ for(let i=0;i<8;i++){
+  let a=i*Math.PI/4;
+  const root=new THREE.Mesh(new THREE.CylinderGeometry(.06,.19,1.1,8),bark);
+  root.position.set(Math.cos(a)*.4,.22,Math.sin(a)*.4);
+  root.rotation.z=Math.cos(a)*.55;
+  root.rotation.x=Math.sin(a)*.55;
+  root.castShadow=true;
+  treeGroup.add(root);
+ }
+ for(let i=0;i<7;i++){
+  let a=i*Math.PI*2/7;
+  const branch=new THREE.Mesh(new THREE.CylinderGeometry(.07,.16,1.5,8),bark);
+  branch.position.set(Math.cos(a)*.55,2.35,Math.sin(a)*.55);
+  branch.rotation.z=Math.cos(a)*-.8;
+  branch.rotation.x=Math.sin(a)*.8;
+  treeGroup.add(branch);
+ }
+ const positions=[
+  [0,3.4,0,1.45],
+  [-.8,3.1,0,1.05],
+  [.8,3.1,0,1.05],
+  [0,4.15,0,1.1],
+  [0,2.9,.65,.85],
+  [0,2.9,-.65,.85]
+ ];
+ positions.forEach(([x,y,z,s])=>{
+  const crown=new THREE.Mesh(new THREE.IcosahedronGeometry(s,2),leaves);
+  crown.position.set(x,y,z);
+  crown.scale.y=.9;
+  crown.castShadow=true;
+  crown.receiveShadow=true;
+  treeGroup.add(crown);
+ });
  treeGroup.visible=true;
+}
+function treeType(){
+ let chosen=0;
+ trees.forEach((t,i)=>{if(level>=t.level)chosen=i});
+ if(!unlockedTrees.includes(chosen))unlockedTrees.push(chosen);
+ return chosen;
+}
+function updateTree(){
+ let progress=xp/needXP();
+ treeGroup.scale.setScalar(.68+progress*.65);
 }
 makeTree();
 
-// Gießkanne
+// Watering can, visible beside the tree
 const canGroup=new THREE.Group();
 scene.add(canGroup);
-const metal=new THREE.MeshStandardMaterial({color:cans[state.can].color,metalness:.65,roughness:.3});
-const darkMetal=new THREE.MeshStandardMaterial({color:0x536b58,metalness:.5,roughness:.4});
-
-const body=new THREE.Mesh(new THREE.CylinderGeometry(.35,.42,.65,24),metal);
-body.position.set(2.05,.65,0);
+canGroup.position.set(2.5,.5,1);
+const metal=new THREE.MeshStandardMaterial({color:0xb49a5c,metalness:.65,roughness:.3});
+const body=new THREE.Mesh(new THREE.CylinderGeometry(.38,.48,.85,24),metal);
+body.rotation.z=-.25;
+body.position.y=.55;
 canGroup.add(body);
-const top=new THREE.Mesh(new THREE.CylinderGeometry(.35,.35,.1,24),darkMetal);
-top.position.set(2.05,1.02,0);
-canGroup.add(top);
-const handle=new THREE.Mesh(new THREE.TorusGeometry(.35,.065,10,24,Math.PI),darkMetal);
-handle.position.set(2.05,.85,0);
+const handle=new THREE.Mesh(new THREE.TorusGeometry(.32,.07,10,24,Math.PI),metal);
+handle.position.set(0,1,.05);
 handle.rotation.z=Math.PI;
 canGroup.add(handle);
-const spout=new THREE.Mesh(new THREE.CylinderGeometry(.07,.12,.9,12),metal);
-spout.position.set(2.7,.85,0);
-spout.rotation.z=-1.05;
+const spout=new THREE.Mesh(new THREE.CylinderGeometry(.09,.16,.9,12),metal);
+spout.position.set(-.58,.85,0);
+spout.rotation.z=-1.0;
 canGroup.add(spout);
-const nozzle=new THREE.Mesh(new THREE.SphereGeometry(.15,16,12),darkMetal);
-nozzle.position.set(3.08,1.2,0);
-canGroup.add(nozzle);
+const shower=new THREE.Mesh(new THREE.SphereGeometry(.19,16,12),metal);
+shower.position.set(-.95,1.22,0);
+canGroup.add(shower);
 
-const waterMaterial=new THREE.MeshStandardMaterial({color:0x63caff,transparent:true,opacity:.8,emissive:0x164d77});
-let waterLine=null;
-let waterTimer=0;
-
-function waterEffect(){
- if(waterLine)scene.remove(waterLine);
- const points=[
-  new THREE.Vector3(3.08,1.2,0),
-  new THREE.Vector3(2.4,.9,.1),
-  new THREE.Vector3(1.3,.35,.1),
-  new THREE.Vector3(.3,.08,.1)
- ];
- const curve=new THREE.CatmullRomCurve3(points);
- waterLine=new THREE.Mesh(new THREE.TubeGeometry(curve,24,.045,8,false),waterMaterial);
- scene.add(waterLine);
- waterTimer=1;
+const waterMaterial=new THREE.MeshBasicMaterial({color:0x70c9e9});
+let waterDrop;
+function showWater(){
+ if(waterDrop)scene.remove(waterDrop);
+ const curve=new THREE.QuadraticBezierCurve3(
+  new THREE.Vector3(1.55,1.7,1),
+  new THREE.Vector3(.6,2.4,1),
+  new THREE.Vector3(.1,.2,1)
+ );
+ waterDrop=new THREE.Mesh(new THREE.TubeGeometry(curve,24,.045,8,false),waterMaterial);
+ scene.add(waterDrop);
+ setTimeout(()=>{if(waterDrop){scene.remove(waterDrop);waterDrop=null}},900);
 }
 
-function updateCanAppearance(){metal.color.setHex(cans[state.can].color)}
-
-function updateUI(){
- const needed=xpNeeded();
- document.getElementById('coins').textContent=state.coins.toLocaleString('de-DE');
- document.getElementById('level').textContent=state.level.toLocaleString('de-DE');
- document.getElementById('xp').textContent=state.xp.toLocaleString('de-DE')+'/'+needed.toLocaleString('de-DE');
- document.getElementById('xpbar').style.width=Math.min(100,state.xp/needed*100)+'%';
- document.getElementById('leveltext').textContent='Level '+state.level.toLocaleString('de-DE')+' · '+treeNames[currentTreeIndex()]+' · Nächstes Level: '+needed.toLocaleString('de-DE')+' XP';
- save();
+function resize(){
+ const w=innerWidth,h=canvas.clientHeight;
+ renderer.setSize(w,h);
+ camera.aspect=w/h;
+ camera.updateProjectionMatrix();
 }
-updateUI();
-updateCanAppearance();
-
-function waterTree(){
- const power=canPower(state.can);
- const money=Math.max(1,Math.floor(power*.5+state.level*2));
- state.xp+=power;
- state.coins+=money;
- let levels=0,bonus=0;
-
- while(state.xp>=xpNeeded()&&levels<100){
-  state.xp-=xpNeeded();
-  state.level++;
-  levels++;
-  const reward=state.level*10;
-  state.coins+=reward;
-  bonus+=reward;
- }
- makeTree();
- waterEffect();
- updateUI();
- document.getElementById('message').textContent=levels>0?
-  '🎉 '+levels+' Levelaufstieg! +'+bonus+' Bonus-Münzen!':
-  '+'+power+' XP · +'+money+' Münzen 💧';
-}
-document.getElementById('water').onclick=waterTree;
-
-function closePanels(){
- document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
-}
-window.closePanels=closePanels;
-function showPanel(id){
- closePanels();
- document.getElementById(id).style.display='block';
-}
-
-function nextCanUnlocked(i){
- return i===0||(state.owned.includes(i-1)&&canLevel(i-1)>=50);
-}
-
-function buildShop(){
- const el=document.getElementById('shopItems');
- el.innerHTML='';
- cans.forEach((c,i)=>{
-  const owned=state.owned.includes(i);
-  const lv=canLevel(i);
-  const div=document.createElement('div');
-  div.className='item';
-  const top=document.createElement('div');
-  top.className='itemtop';
-  const info=document.createElement('div');
-  const title=document.createElement('b');
-  title.textContent='💧 '+c.name;
-  const detail=document.createElement('small');
-  detail.textContent=owned?
-   'Level '+lv+'/50 · '+canPower(i)+' XP pro Gießen':
-   'Basis: '+c.power+' XP · Preis: '+c.price.toLocaleString('de-DE')+' Münzen';
-  info.append(title,detail);
-  top.append(info);
-
-  const btn=document.createElement('button');
-  if(!owned){
-   btn.textContent=nextCanUnlocked(i)?'Kaufen':'🔒 Gesperrt';
-   btn.disabled=!nextCanUnlocked(i);
-   btn.onclick=()=>{
-    if(state.coins<c.price){document.getElementById('message').textContent='Nicht genug Münzen!';return}
-    state.coins-=c.price;
-    state.owned.push(i);
-    state.can=i;
-    updateCanAppearance();updateUI();buildShop();
-   };
-  }else if(state.can===i){
-   btn.textContent='Ausgerüstet';btn.disabled=true;
-  }else{
-   btn.textContent='Ausrüsten';
-   btn.onclick=()=>{state.can=i;updateCanAppearance();updateUI();buildShop()};
-  }
-  top.append(btn);
-  div.append(top);
-
-  if(owned&&lv<50){
-   const cost=upgradeCost(i);
-   const up=document.createElement('button');
-   up.textContent='⬆ Verbessern · '+cost.toLocaleString('de-DE')+' Münzen';
-   up.style.marginTop='8px';
-   up.onclick=()=>{
-    if(state.coins<cost){document.getElementById('message').textContent='Nicht genug Münzen!';return}
-    state.coins-=cost;state.canLevels[i]++;
-    updateUI();buildShop();
-   };
-   div.append(up);
-  }
-  el.append(div);
- });
-}
-document.getElementById('shopBtn').onclick=()=>{buildShop();showPanel('shop')};
-
-function buildInventory(){
- const el=document.getElementById('inventoryItems');
- el.innerHTML='';
- state.owned.forEach(i=>{
-  const div=document.createElement('div');
-  div.className='item';
-  const top=document.createElement('div');
-  top.className='itemtop';
-  const info=document.createElement('div');
-  const title=document.createElement('b');
-  title.textContent='💧 '+cans[i].name;
-  const detail=document.createElement('small');
-  detail.textContent='Level '+canLevel(i)+'/50 · '+canPower(i)+' XP pro Gießen';
-  info.append(title,detail);
-  const btn=document.createElement('button');
-  btn.textContent=state.can===i?'Ausgerüstet':'Ausrüsten';
-  btn.disabled=state.can===i;
-  btn.onclick=()=>{state.can=i;updateCanAppearance();updateUI();buildInventory()};
-  top.append(info,btn);div.append(top);el.append(div);
- });
-}
-document.getElementById('inventoryBtn').onclick=()=>{buildInventory();showPanel('inventory')};
-
-function buildTrees(){
- const el=document.getElementById('treeItems');
- el.innerHTML='';
- treeNames.forEach((name,i)=>{
-  const div=document.createElement('div');
-  div.className='item';
-  div.textContent=(state.level>=unlocks[i]?'🌳 ':'🔒 ')+name+' · Level '+unlocks[i];
-  el.append(div);
- });
-}
-document.getElementById('treesBtn').onclick=()=>{buildTrees();showPanel('trees')};
-
-// Verstecktes Admin-Menü: fünfmal auf Level tippen, Code 2203
-let tapCount=0,tapTimer;
-document.getElementById('level').onclick=()=>{
- tapCount++;
- clearTimeout(tapTimer);
- tapTimer=setTimeout(()=>tapCount=0,1800);
- if(tapCount>=5){
-  tapCount=0;
-  const code=prompt('Besitzer-Code eingeben:');
-  if(code==='2203')showPanel('admin');
-  else if(code!==null)document.getElementById('message').textContent='Falscher Code!';
- }
-};
-
-function refreshAdmin(){
- makeTree();updateCanAppearance();updateUI();buildShop();buildInventory();buildTrees();
-}
-function giveMoney(){
- state.coins=999999999999999;
- refreshAdmin();
- document.getElementById('message').textContent='🪙 Sehr viel Geld erhalten!';
-}
-function setLevel(value){
- const n=Math.floor(Number(value));
- if(!Number.isFinite(n)||n<1)return;
- state.level=Math.min(1000000,n);
- state.xp=0;
- refreshAdmin();
- document.getElementById('message').textContent='⭐ Level '+state.level.toLocaleString('de-DE')+' erreicht!';
-}
-function unlockAll(){
- state.owned=cans.map((c,i)=>i);
- refreshAdmin();
-}
-function maxCans(){
- state.owned=cans.map((c,i)=>i);
- state.canLevels=cans.map(()=>50);
- state.can=9;
- refreshAdmin();
-}
-function everything(){
- state.coins=999999999999999;
- state.level=1000000;
- state.xp=0;
- state.owned=cans.map((c,i)=>i);
- state.canLevels=cans.map(()=>50);
- state.can=9;
- refreshAdmin();
- document.getElementById('message').textContent='👑 Alles freigeschaltet!';
-}
-
-document.getElementById('setLevelBtn').onclick=()=>setLevel(document.getElementById('adminLevelInput').value);
-document.getElementById('maxLevelBtn').onclick=()=>setLevel(1000000);
-document.getElementById('moneyBtn').onclick=giveMoney;
-document.getElementById('allUnlockBtn').onclick=unlockAll;
-document.getElementById('maxCansBtn').onclick=maxCans;
-document.getElementById('everythingBtn').onclick=everything;
+addEventListener('resize',resize);
 
 function animate(){
  requestAnimationFrame(animate);
- if(waterTimer>0){
-  waterTimer-=.025;
-  if(waterLine)waterLine.visible=waterTimer>0;
- }
+ canGroup.rotation.y=Math.sin(Date.now()*.001)*.04;
  renderer.render(scene,camera);
 }
 animate();
 
-addEventListener('resize',()=>{
- camera.aspect=innerWidth/innerHeight;
- camera.updateProjectionMatrix();
- renderer.setSize(innerWidth,innerHeight);
-});
+function waterTree(){
+ let amount=power();
+ xp+=amount;
+ coins+=Math.max(1,Math.floor(amount*.5+level*2));
+ document.getElementById('message').textContent='💧 Dein Baum wurde gegossen! +'+amount+' XP';
+ showWater();
+ while(xp>=needXP()){
+  xp-=needXP();
+  level++;
+  coins+=level*10;
+  notify('🌳 LEVEL UP! Level '+level);
+ }
+ update();
+}
+window.waterTree=waterTree;
+
+function openAdmin(){
+ document.getElementById('adminModal').style.display='flex';
+ document.getElementById('adminLogin').style.display='block';
+ document.getElementById('adminTools').style.display='none';
+ document.getElementById('adminCode').value='';
+}
+window.openAdmin=openAdmin;
+function checkAdmin(){
+ if(document.getElementById('adminCode').value==='2203'){
+  document.getElementById('adminLogin').style.display='none';
+  document.getElementById('adminTools').style.display='block';
+  notify('Admin freigeschaltet!');
+ }else notify('Falscher Admin-Code!');
+}
+window.checkAdmin=checkAdmin;
+function giveCoins(){
+ coins=Math.max(0,Number(document.getElementById('setCoins').value)||0);
+ update();notify('Münzen geändert!');
+}
+window.giveCoins=giveCoins;
+function giveLevel(){
+ level=Math.max(1,Math.min(1000000,Math.floor(Number(document.getElementById('setLevel').value)||1)));
+ xp=0;update();notify('Level geändert!');
+}
+window.giveLevel=giveLevel;
+function giveLots(){coins=1000000000;update();notify('1 Milliarde Münzen!')}
+window.giveLots=giveLots;
+function maxEverything(){
+ coins=999999999999;
+ level=1000000;
+ xp=0;
+ owned=cans.map((c,i)=>i);
+ selected=9;
+ cans.forEach((c,i)=>canLevels[i]=50);
+ unlockedTrees=trees.map((t,i)=>i);
+ update();notify('Alles freigeschaltet!');
+}
+window.maxEverything=maxEverything;
+
+function closeModal(id){document.getElementById(id).style.display='none'}
+window.closeModal=closeModal;
+
+function openShop(){
+ let html='';
+ cans.forEach((c,i)=>{
+  let ownedAlready=owned.includes(i);
+  html+=`<div class="item"><b>${c.emoji} ${c.name}</b><br>
+  <span class="small">Stärke: ${c.power} XP | Preis: ${c.price.toLocaleString('de-DE')} Münzen</span><br>
+  <button onclick="buyCan(${i})">${ownedAlready?'BEREITS GEKAUFT':'KAUFEN'}</button></div>`;
+ });
+ document.getElementById('shopItems').innerHTML=html;
+ document.getElementById('shopModal').style.display='flex';
+}
+window.openShop=openShop;
+function buyCan(i){
+ if(owned.includes(i)){notify('Hast du schon!');return}
+ if(coins<cans[i].price){notify('Nicht genug Münzen!');return}
+ coins-=cans[i].price;owned.push(i);update();openShop();notify('Gießkanne gekauft!');
+}
+window.buyCan=buyCan;
+
+function openInventory(){
+ let html='';
+ owned.forEach(i=>{
+  html+=`<div class="item"><b>${cans[i].emoji} ${cans[i].name}</b><br>
+  <span class="small">Level ${canLevels[i]||1} · Stärke ${Math.floor(cans[i].power*Math.pow(1.12,(canLevels[i]||1)-1))} XP</span><br>
+  <button onclick="selectCan(${i})">${selected===i?'AUSGEWÄHLT':'AUSWÄHLEN'}</button></div>`;
+ });
+ document.getElementById('inventoryItems').innerHTML=html;
+ document.getElementById('inventoryModal').style.display='flex';
+}
+window.openInventory=openInventory;
+function selectCan(i){selected=i;update();openInventory();notify('Gießkanne ausgewählt!')}
+window.selectCan=selectCan;
+
+function upgradeCan(){
+ let current=canLevels[selected]||1;
+ if(current>=50){notify('Maximales Level erreicht!');return}
+ let cost=Math.floor(100*Math.pow(current,1.55)*(selected+1));
+ if(coins<cost){notify('Du brauchst '+cost.toLocaleString('de-DE')+' Münzen!');return}
+ coins-=cost;canLevels[selected]=current+1;
+ update();notify('Gießkanne auf Level '+(current+1)+' verbessert!');
+}
+window.upgradeCan=upgradeCan;
+
+function openTrees(){
+ let html='';
+ trees.forEach((t,i)=>{
+  let unlocked=level>=t.level;
+  html+=`<div class="item"><b>🌳 ${t.name}</b><br>
+  <span class="small">${unlocked?'Freigeschaltet':'Benötigt Level '+t.level}</span></div>`;
+ });
+ document.getElementById('treeItems').innerHTML=html;
+ document.getElementById('treesModal').style.display='flex';
+}
+window.openTrees=openTrees;
+
+update();
 </script>
 </body>
- </html>
-
+</html>
