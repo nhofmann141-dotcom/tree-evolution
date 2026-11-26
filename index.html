@@ -21,6 +21,7 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
 .actions{position:absolute;bottom:18px;left:0;right:0;display:flex;justify-content:center;gap:7px;z-index:6;flex-wrap:wrap;padding:0 7px}
 button{border:1px solid #728b64;background:#263d2c;color:white;border-radius:13px;padding:12px 13px;font-size:13px;font-weight:bold;cursor:pointer;touch-action:manipulation}
 button:active{transform:scale(.96);background:#45683e}
+button:disabled{opacity:.5}
 #water{background:#597d43;border-color:#9ab47a;padding:15px 22px;font-size:16px}
 .panel{display:none;position:absolute;z-index:10;left:4%;right:4%;top:15%;max-height:72%;overflow:auto;background:#17251df7;border:1px solid #71866a;border-radius:18px;padding:16px;box-shadow:0 10px 40px #000b}
 .panel h2{margin:0 0 8px}
@@ -33,6 +34,9 @@ button:active{transform:scale(.96);background:#45683e}
 .close{margin-top:14px}
 .progress{height:6px;background:#354536;border-radius:10px;margin-top:8px;overflow:hidden}
 .progress div{height:100%;background:#a4c77d}
+.adminInput{width:100%;padding:12px;margin:8px 0;background:#101812;color:white;border:1px solid #71866a;border-radius:10px;font-size:16px}
+.adminButton{width:100%;margin:5px 0;background:#354f38}
+.adminDanger{background:#633333;border-color:#a66b6b}
 </style>
 </head>
 <body>
@@ -71,6 +75,22 @@ button:active{transform:scale(.96);background:#45683e}
  <h2>🌳 Baum-Sammlung</h2>
  <div id="treeItems"></div>
  <button class="close" onclick="closePanels()">Schließen</button>
+</div>
+
+<div class="panel" id="admin">
+ <h2>🔐 Besitzer-Menü</h2>
+ <div class="sub">Admin-Steuerung für Tree Evolution</div>
+
+ <label>Spielerlevel einstellen:</label>
+ <input class="adminInput" id="adminLevelInput" type="number" min="1" max="1000000" value="100">
+
+ <button class="adminButton" id="setLevelBtn">⭐ Level übernehmen</button>
+ <button class="adminButton" id="maxLevelBtn">🚀 Level auf 1.000.000 setzen</button>
+ <button class="adminButton" id="moneyBtn">🪙 Sehr viel Geld geben</button>
+ <button class="adminButton" id="allUnlockBtn">🔓 Alle Gießkannen freischalten</button>
+ <button class="adminButton" id="maxCansBtn">💧 Alle Gießkannen auf Level 50</button>
+ <button class="adminButton" id="everythingBtn">👑 ALLES FREISCHALTEN</button>
+ <button class="adminButton adminDanger" id="closeAdminBtn">Admin-Menü schließen</button>
 </div>
 
 <script type="module">
@@ -206,7 +226,8 @@ if(!Number.isFinite(state.coins)||state.coins<0)state.coins=0;
 if(!Number.isInteger(state.can)||!state.owned.includes(state.can))state.can=0;
 
 function xpNeeded(){
- return Math.floor(100*Math.pow(1.2,state.level-1));
+ // Verhindert, dass die XP-Anzeige bei sehr hohen Admin-Leveln überläuft.
+ return Math.floor(100*Math.pow(1.2,Math.min(state.level-1,300)));
 }
 
 function canLevel(i){
@@ -367,13 +388,13 @@ function updateCanAppearance(){
 function updateUI(){
  const needed=xpNeeded();
  document.getElementById('coins').textContent=state.coins.toLocaleString('de-DE');
- document.getElementById('level').textContent=state.level;
+ document.getElementById('level').textContent=state.level.toLocaleString('de-DE');
  document.getElementById('xp').textContent=
   state.xp.toLocaleString('de-DE')+'/'+needed.toLocaleString('de-DE');
  document.getElementById('xpbar').style.width=
   Math.min(100,state.xp/needed*100)+'%';
  document.getElementById('leveltext').textContent=
-  'Level '+state.level+' · '+treeNames[currentTreeIndex()]+' · Nächstes Level: '+needed+' XP';
+  'Level '+state.level.toLocaleString('de-DE')+' · '+treeNames[currentTreeIndex()]+' · Nächstes Level: '+needed.toLocaleString('de-DE')+' XP';
  save();
 }
 updateUI();
@@ -615,21 +636,36 @@ document.getElementById('treesBtn').onclick=()=>{
  showPanel('trees');
 };
 
-function animate(){
- requestAnimationFrame(animate);
- if(waterTimer>0){
-  waterTimer-=.025;
-  if(waterLine)waterLine.visible=waterTimer>0;
- }
- renderer.render(scene,camera);
-}
-animate();
+/* VERSTECKTER BESITZER-ZUGANG:
+   5-mal auf die Level-Zahl tippen, danach Code 2203 eingeben. */
+let adminTapCount=0;
+let adminTapTimer=null;
 
-addEventListener('resize',()=>{
- camera.aspect=innerWidth/innerHeight;
- camera.updateProjectionMatrix();
- renderer.setSize(innerWidth,innerHeight);
+document.getElementById('level').addEventListener('click',()=>{
+ adminTapCount++;
+ clearTimeout(adminTapTimer);
+ adminTapTimer=setTimeout(()=>adminTapCount=0,1800);
+
+ if(adminTapCount>=5){
+  adminTapCount=0;
+  const code=prompt('Besitzer-Code eingeben:');
+  if(code==='2203'){
+   showPanel('admin');
+   document.getElementById('message').textContent='🔓 Besitzer-Menü geöffnet';
+  }else if(code!==null){
+   document.getElementById('message').textContent='❌ Falscher Code!';
+  }
+ }
 });
-</script>
-</body>
-</html>
+
+function adminRefresh(){
+ makeTree();
+ updateCanAppearance();
+ updateUI();
+ buildShop();
+ buildInventory();
+ buildTrees();
+}
+
+function giveMoney(){
+ state.coins=999
