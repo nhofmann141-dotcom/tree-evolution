@@ -15,12 +15,12 @@ canvas{display:block;width:100%;height:100%;touch-action:none}
 .stat small{display:block;color:#a9c29e;font-size:10px}
 .stat strong{font-size:15px}
 .xpbox{position:absolute;top:81px;left:12%;width:76%;height:9px;background:#263328;border-radius:20px;overflow:hidden;z-index:5}
-#xpbar{height:100%;width:0;background:linear-gradient(90deg,#7da85b,#d0d78a);transition:width .3s}
+#xpbar{height:100%;width:0;background:linear-gradient(90deg,#7da85b,#d0d78a)}
 #leveltext{position:absolute;top:96px;width:100%;text-align:center;font-size:11px;color:#d5e2cc;z-index:5}
 #message{position:absolute;top:120px;left:0;right:0;text-align:center;color:#e4edcf;font-weight:bold;z-index:5;text-shadow:0 2px 5px black;padding:0 10px;font-size:13px}
 .actions{position:absolute;bottom:18px;left:0;right:0;display:flex;justify-content:center;gap:7px;z-index:6;flex-wrap:wrap;padding:0 7px}
 button{border:1px solid #728b64;background:#263d2c;color:white;border-radius:13px;padding:12px 13px;font-size:13px;font-weight:bold;cursor:pointer;touch-action:manipulation}
-button:active{transform:scale(.96);background:#45683e}
+button:active{transform:scale(.96)}
 button:disabled{opacity:.5}
 #water{background:#597d43;border-color:#9ab47a;padding:15px 22px;font-size:16px}
 .panel{display:none;position:absolute;z-index:10;left:4%;right:4%;top:15%;max-height:72%;overflow:auto;background:#17251df7;border:1px solid #71866a;border-radius:18px;padding:16px;box-shadow:0 10px 40px #000b}
@@ -30,13 +30,11 @@ button:disabled{opacity:.5}
 .itemtop{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .item button{padding:9px 11px;white-space:nowrap}
 .item small{color:#b9cbb2;display:block;margin-top:5px;line-height:1.5}
-.item .locked{color:#d1a77b}
 .close{margin-top:14px}
 .progress{height:6px;background:#354536;border-radius:10px;margin-top:8px;overflow:hidden}
 .progress div{height:100%;background:#a4c77d}
 .adminInput{width:100%;padding:12px;margin:8px 0;background:#101812;color:white;border:1px solid #71866a;border-radius:10px;font-size:16px}
 .adminButton{width:100%;margin:5px 0;background:#354f38}
-.adminDanger{background:#633333;border-color:#a66b6b}
 </style>
 </head>
 <body>
@@ -48,7 +46,7 @@ button:disabled{opacity:.5}
  <div class="stat"><small>🌱 XP</small><strong id="xp">0/100</strong></div>
 </div>
 <div class="xpbox"><div id="xpbar"></div></div>
-<div id="leveltext">Dein Baum entwickelt sich</div>
+<div id="leveltext"></div>
 <div id="message">Dein Baum wartet auf Wasser 🌳</div>
 
 <div class="actions">
@@ -60,7 +58,7 @@ button:disabled{opacity:.5}
 
 <div class="panel" id="shop">
  <h2>🛒 Gießkannen-Shop</h2>
- <div class="sub">Verbessere deine Gießkanne bis Level 50. Danach wird die nächste freigeschaltet!</div>
+ <div class="sub">Verbessere deine Gießkanne bis Level 50.</div>
  <div id="shopItems"></div>
  <button class="close" onclick="closePanels()">Schließen</button>
 </div>
@@ -79,18 +77,16 @@ button:disabled{opacity:.5}
 
 <div class="panel" id="admin">
  <h2>🔐 Besitzer-Menü</h2>
- <div class="sub">Admin-Steuerung für Tree Evolution</div>
-
+ <div class="sub">Admin-Steuerung</div>
  <label>Spielerlevel einstellen:</label>
  <input class="adminInput" id="adminLevelInput" type="number" min="1" max="1000000" value="100">
-
  <button class="adminButton" id="setLevelBtn">⭐ Level übernehmen</button>
- <button class="adminButton" id="maxLevelBtn">🚀 Level auf 1.000.000 setzen</button>
- <button class="adminButton" id="moneyBtn">🪙 Sehr viel Geld geben</button>
+ <button class="adminButton" id="maxLevelBtn">🚀 Level 1.000.000</button>
+ <button class="adminButton" id="moneyBtn">🪙 Sehr viel Geld</button>
  <button class="adminButton" id="allUnlockBtn">🔓 Alle Gießkannen freischalten</button>
- <button class="adminButton" id="maxCansBtn">💧 Alle Gießkannen auf Level 50</button>
+ <button class="adminButton" id="maxCansBtn">💧 Alle Gießkannen Level 50</button>
  <button class="adminButton" id="everythingBtn">👑 ALLES FREISCHALTEN</button>
- <button class="adminButton adminDanger" id="closeAdminBtn">Admin-Menü schließen</button>
+ <button class="close" onclick="closePanels()">Schließen</button>
 </div>
 
 <script type="module">
@@ -99,24 +95,27 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.m
 const container=document.getElementById('game');
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x111b18);
-scene.fog=new THREE.Fog(0x111b18,12,28);
+scene.fog=new THREE.Fog(0x111b18,18,40);
 
 const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,100);
-camera.position.set(0,5.2,10);
-camera.lookAt(0,2,0);
+camera.position.set(0,5.2,12);
+camera.lookAt(0,2.1,0);
 
 const renderer=new THREE.WebGLRenderer({antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled=true;
-renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 container.appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xc8dfc4,0x283522,2));
-const light=new THREE.DirectionalLight(0xe0edcf,2.2);
-light.position.set(-4,8,5);
-light.castShadow=true;
-scene.add(light);
+scene.add(new THREE.HemisphereLight(0xc8dfc4,0x283522,2.2));
+const sun=new THREE.DirectionalLight(0xe0edcf,2.5);
+sun.position.set(-4,9,5);
+sun.castShadow=true;
+scene.add(sun);
+
+const fill=new THREE.PointLight(0x789b70,1.2,18);
+fill.position.set(2,4,4);
+scene.add(fill);
 
 const ground=new THREE.Mesh(
  new THREE.CircleGeometry(9,64),
@@ -142,29 +141,27 @@ const moon=new THREE.Mesh(
 moon.position.set(-4.5,6,-5);
 scene.add(moon);
 
+// Hintergrundbäume
 for(let i=0;i<18;i++){
  const h=2+Math.random()*3;
- const tree=new THREE.Group();
+ const group=new THREE.Group();
  const trunk=new THREE.Mesh(
   new THREE.CylinderGeometry(.12,.22,h,7),
   new THREE.MeshStandardMaterial({color:0x30251c})
  );
  trunk.position.y=h/2;
- tree.add(trunk);
+ group.add(trunk);
  const leaves=new THREE.Mesh(
   new THREE.ConeGeometry(.9,h*.65,7),
   new THREE.MeshStandardMaterial({color:0x18291e})
  );
  leaves.position.y=h*.85;
- tree.add(leaves);
+ group.add(leaves);
  const a=Math.random()*Math.PI*2;
  const r=7+Math.random()*3;
- tree.position.set(Math.cos(a)*r,0,Math.sin(a)*r-2);
- scene.add(tree);
+ group.position.set(Math.cos(a)*r,0,Math.sin(a)*r-2);
+ scene.add(group);
 }
-
-const treeGroup=new THREE.Group();
-scene.add(treeGroup);
 
 const palettes=[
  [0x315b32,0x416b38],
@@ -179,11 +176,7 @@ const palettes=[
  [0x66d7a1,0xd0ff9c]
 ];
 
-const treeNames=[
-'Eichenbaum','Candy Tree','Engelbaum','Teufelsbaum',
-'Kristallbaum','Goldbaum','Galaxy-Baum','Eisbaum',
-'Feuerbaum','Regenbogenbaum'
-];
+const treeNames=['Eichenbaum','Candy Tree','Engelbaum','Teufelsbaum','Kristallbaum','Goldbaum','Galaxy-Baum','Eisbaum','Feuerbaum','Regenbogenbaum'];
 const unlocks=[1,3,5,8,12,16,20,25,30,40];
 
 const cans=[
@@ -199,168 +192,156 @@ const cans=[
  {name:'Götter-Kanne',price:100000000,power:6000,color:0xffe4a0}
 ];
 
-let state={
- coins:0,level:1,xp:0,can:0,
- owned:[0],
- canLevels:[1,1,1,1,1,1,1,1,1,1]
-};
-
+let state={coins:0,level:1,xp:0,can:0,owned:[0],canLevels:Array(10).fill(1)};
 try{
- const saved=localStorage.getItem('treeEvolutionSave');
- if(saved){
-  const old=JSON.parse(saved);
-  state={...state,...old};
- }
+ const old=JSON.parse(localStorage.getItem('treeEvolutionSave'));
+ if(old)state={...state,...old};
 }catch(e){}
 
 if(!Array.isArray(state.owned))state.owned=[0];
-if(!Array.isArray(state.canLevels))state.canLevels=[];
-for(let i=0;i<cans.length;i++){
- if(!Number.isFinite(state.canLevels[i]))state.canLevels[i]=1;
- state.canLevels[i]=Math.max(1,Math.min(50,state.canLevels[i]));
+if(!Array.isArray(state.canLevels))state.canLevels=Array(10).fill(1);
+for(let i=0;i<10;i++){
+ state.canLevels[i]=Math.max(1,Math.min(50,Number(state.canLevels[i])||1));
 }
 if(!state.owned.includes(0))state.owned.push(0);
 if(!Number.isFinite(state.level)||state.level<1)state.level=1;
 if(!Number.isFinite(state.xp)||state.xp<0)state.xp=0;
 if(!Number.isFinite(state.coins)||state.coins<0)state.coins=0;
-if(!Number.isInteger(state.can)||!state.owned.includes(state.can))state.can=0;
+if(!state.owned.includes(state.can))state.can=0;
 
 function xpNeeded(){
- // Verhindert, dass die XP-Anzeige bei sehr hohen Admin-Leveln überläuft.
  return Math.floor(100*Math.pow(1.2,Math.min(state.level-1,300)));
 }
-
-function canLevel(i){
- return state.canLevels[i]||1;
-}
-
-function canPower(i){
- return Math.floor(cans[i].power*(1+(canLevel(i)-1)*.12));
-}
-
-function upgradeCost(i){
- const lv=canLevel(i);
- return Math.floor(100*Math.pow(i+1,1.65)*Math.pow(lv,1.55));
-}
-
+function canLevel(i){return state.canLevels[i]||1}
+function canPower(i){return Math.floor(cans[i].power*(1+(canLevel(i)-1)*.12))}
+function upgradeCost(i){return Math.floor(100*Math.pow(i+1,1.65)*Math.pow(canLevel(i),1.55))}
 function currentTreeIndex(){
  let index=0;
- for(let i=0;i<unlocks.length;i++){
-  if(state.level>=unlocks[i])index=i;
- }
+ for(let i=0;i<unlocks.length;i++)if(state.level>=unlocks[i])index=i;
  return index;
 }
-
 function save(){
- try{
-  localStorage.setItem('treeEvolutionSave',JSON.stringify(state));
- }catch(e){}
+ try{localStorage.setItem('treeEvolutionSave',JSON.stringify(state))}catch(e){}
 }
 
+const treeGroup=new THREE.Group();
+treeGroup.position.set(0,0,0);
+scene.add(treeGroup);
+
+// Baum wird immer sichtbar in der Mitte erstellt
 function makeTree(){
- while(treeGroup.children.length){
-  treeGroup.remove(treeGroup.children[0]);
- }
+ treeGroup.clear();
 
  const colors=palettes[currentTreeIndex()];
  const bark=new THREE.MeshStandardMaterial({color:0x503522,roughness:1});
- const leaves=[
-  new THREE.MeshStandardMaterial({color:colors[0],roughness:.9}),
-  new THREE.MeshStandardMaterial({color:colors[1],roughness:.9})
+ const bark2=new THREE.MeshStandardMaterial({color:0x795337,roughness:1});
+ const leafMaterials=[
+  new THREE.MeshStandardMaterial({color:colors[0],roughness:.85}),
+  new THREE.MeshStandardMaterial({color:colors[1],roughness:.85})
  ];
 
- const trunk=new THREE.Mesh(
-  new THREE.CylinderGeometry(.28,.48,2.5,12),bark
- );
- trunk.position.y=1.25;
- trunk.castShadow=true;
- treeGroup.add(trunk);
-
- for(let i=0;i<5;i++){
-  const root=new THREE.Mesh(
-   new THREE.CylinderGeometry(.04,.2,1,7),bark
-  );
-  root.position.set(Math.cos(i*1.25)*.43,.25,Math.sin(i*1.25)*.43);
-  root.rotation.z=Math.cos(i*1.25)*.65;
-  root.rotation.x=Math.sin(i*1.25)*.65;
-  treeGroup.add(root);
+ function addMesh(geometry,material,x,y,z,rx=0,ry=0,rz=0){
+  const mesh=new THREE.Mesh(geometry,material);
+  mesh.position.set(x,y,z);
+  mesh.rotation.set(rx,ry,rz);
+  mesh.castShadow=true;
+  mesh.receiveShadow=true;
+  treeGroup.add(mesh);
+  return mesh;
  }
 
- for(let i=0;i<13;i++){
-  const angle=i*2.4;
-  const branch=new THREE.Mesh(
-   new THREE.CylinderGeometry(.045,.12,1.2,7),bark
+ // Stamm
+ addMesh(new THREE.CylinderGeometry(.38,.58,2.9,16),bark,0,1.45,0);
+
+ // Stammrinde
+ for(let i=0;i<8;i++){
+  const a=i*Math.PI/4;
+  addMesh(
+   new THREE.CylinderGeometry(.025,.035,2.2,6),
+   bark2,
+   Math.cos(a)*.34,1.45,Math.sin(a)*.34
   );
-  branch.position.set(Math.cos(angle)*.65,2+Math.random()*.7,Math.sin(angle)*.55);
-  branch.rotation.z=Math.cos(angle)*-.7;
-  branch.rotation.x=Math.sin(angle)*.7;
-  treeGroup.add(branch);
  }
 
- for(let i=0;i<17;i++){
-  const a=i*2.4;
-  const r=.6+Math.random()*.55;
-  const leaf=new THREE.Mesh(
-   new THREE.IcosahedronGeometry(.75+Math.random()*.25,2),
-   leaves[i%2]
+ // Wurzeln
+ for(let i=0;i<8;i++){
+  const a=i*Math.PI/4;
+  addMesh(
+   new THREE.CylinderGeometry(.035,.2,1.2,9),
+   bark,
+   Math.cos(a)*.48,.27,Math.sin(a)*.48,
+   Math.sin(a)*.85,0,Math.cos(a)*-.85
   );
-  leaf.position.set(Math.cos(a)*r,2.9+Math.random()*1.25,Math.sin(a)*r);
-  leaf.scale.set(1.1,1,.95);
-  leaf.castShadow=true;
-  treeGroup.add(leaf);
  }
 
- const progress=state.xp/xpNeeded();
+ // Äste
+ for(let i=0;i<9;i++){
+  const a=i*Math.PI*2/9;
+  addMesh(
+   new THREE.CylinderGeometry(.05,.15,1.45,9),
+   bark,
+   Math.cos(a)*.62,2.2,Math.sin(a)*.62,
+   Math.sin(a)*.7,0,Math.cos(a)*-.7
+  );
+ }
+
+ // Große runde Krone
+ const crown=[
+  [0,3.65,0,1.05],
+  [-.75,3.5,0,.88],
+  [.75,3.5,0,.88],
+  [0,3.5,.75,.88],
+  [0,3.5,-.75,.88],
+  [-.55,4.25,.25,.85],
+  [.55,4.25,-.25,.85],
+  [0,4.55,0,.85],
+  [-1.05,3.95,-.2,.72],
+  [1.05,3.95,.2,.72],
+  [0,3.95,1.05,.72],
+  [0,3.95,-1.05,.72],
+  [-.65,3.1,.55,.68],
+  [.65,3.1,-.55,.68]
+ ];
+
+ crown.forEach((p,i)=>{
+  addMesh(
+   new THREE.IcosahedronGeometry(p[3],2),
+   leafMaterials[i%2],
+   p[0],p[1],p[2]
+  );
+ });
+
+ const progress=Math.min(1,state.xp/xpNeeded());
  treeGroup.scale.setScalar(.72+progress*.58);
+ treeGroup.visible=true;
 }
 makeTree();
 
+// Gießkanne
 const canGroup=new THREE.Group();
 scene.add(canGroup);
+const metal=new THREE.MeshStandardMaterial({color:cans[state.can].color,metalness:.65,roughness:.3});
+const darkMetal=new THREE.MeshStandardMaterial({color:0x536b58,metalness:.5,roughness:.4});
 
-let metal=new THREE.MeshStandardMaterial({
- color:cans[state.can].color,metalness:.65,roughness:.3
-});
-const darkMetal=new THREE.MeshStandardMaterial({
- color:0x536b58,metalness:.5,roughness:.4
-});
-
-const body=new THREE.Mesh(
- new THREE.CylinderGeometry(.35,.42,.65,24),metal
-);
+const body=new THREE.Mesh(new THREE.CylinderGeometry(.35,.42,.65,24),metal);
 body.position.set(2.05,.65,0);
 canGroup.add(body);
-
-const top=new THREE.Mesh(
- new THREE.CylinderGeometry(.35,.35,.1,24),darkMetal
-);
+const top=new THREE.Mesh(new THREE.CylinderGeometry(.35,.35,.1,24),darkMetal);
 top.position.set(2.05,1.02,0);
 canGroup.add(top);
-
-const handle=new THREE.Mesh(
- new THREE.TorusGeometry(.35,.065,10,24,Math.PI),darkMetal
-);
+const handle=new THREE.Mesh(new THREE.TorusGeometry(.35,.065,10,24,Math.PI),darkMetal);
 handle.position.set(2.05,.85,0);
 handle.rotation.z=Math.PI;
 canGroup.add(handle);
-
-const spout=new THREE.Mesh(
- new THREE.CylinderGeometry(.07,.12,.9,12),metal
-);
+const spout=new THREE.Mesh(new THREE.CylinderGeometry(.07,.12,.9,12),metal);
 spout.position.set(2.7,.85,0);
 spout.rotation.z=-1.05;
 canGroup.add(spout);
-
-const nozzle=new THREE.Mesh(
- new THREE.SphereGeometry(.15,16,12),darkMetal
-);
+const nozzle=new THREE.Mesh(new THREE.SphereGeometry(.15,16,12),darkMetal);
 nozzle.position.set(3.08,1.2,0);
 canGroup.add(nozzle);
 
-const waterMaterial=new THREE.MeshStandardMaterial({
- color:0x63caff,transparent:true,opacity:.8,
- emissive:0x164d77
-});
+const waterMaterial=new THREE.MeshStandardMaterial({color:0x63caff,transparent:true,opacity:.8,emissive:0x164d77});
 let waterLine=null;
 let waterTimer=0;
 
@@ -373,28 +354,20 @@ function waterEffect(){
   new THREE.Vector3(.3,.08,.1)
  ];
  const curve=new THREE.CatmullRomCurve3(points);
- waterLine=new THREE.Mesh(
-  new THREE.TubeGeometry(curve,24,.045,8,false),
-  waterMaterial
- );
+ waterLine=new THREE.Mesh(new THREE.TubeGeometry(curve,24,.045,8,false),waterMaterial);
  scene.add(waterLine);
  waterTimer=1;
 }
 
-function updateCanAppearance(){
- metal.color.setHex(cans[state.can].color);
-}
+function updateCanAppearance(){metal.color.setHex(cans[state.can].color)}
 
 function updateUI(){
  const needed=xpNeeded();
  document.getElementById('coins').textContent=state.coins.toLocaleString('de-DE');
  document.getElementById('level').textContent=state.level.toLocaleString('de-DE');
- document.getElementById('xp').textContent=
-  state.xp.toLocaleString('de-DE')+'/'+needed.toLocaleString('de-DE');
- document.getElementById('xpbar').style.width=
-  Math.min(100,state.xp/needed*100)+'%';
- document.getElementById('leveltext').textContent=
-  'Level '+state.level.toLocaleString('de-DE')+' · '+treeNames[currentTreeIndex()]+' · Nächstes Level: '+needed.toLocaleString('de-DE')+' XP';
+ document.getElementById('xp').textContent=state.xp.toLocaleString('de-DE')+'/'+needed.toLocaleString('de-DE');
+ document.getElementById('xpbar').style.width=Math.min(100,state.xp/needed*100)+'%';
+ document.getElementById('leveltext').textContent='Level '+state.level.toLocaleString('de-DE')+' · '+treeNames[currentTreeIndex()]+' · Nächstes Level: '+needed.toLocaleString('de-DE')+' XP';
  save();
 }
 updateUI();
@@ -405,11 +378,9 @@ function waterTree(){
  const money=Math.max(1,Math.floor(power*.5+state.level*2));
  state.xp+=power;
  state.coins+=money;
+ let levels=0,bonus=0;
 
- let levels=0;
- let bonus=0;
-
- while(state.xp>=xpNeeded()){
+ while(state.xp>=xpNeeded()&&levels<100){
   state.xp-=xpNeeded();
   state.level++;
   levels++;
@@ -417,255 +388,194 @@ function waterTree(){
   state.coins+=reward;
   bonus+=reward;
  }
-
  makeTree();
  waterEffect();
  updateUI();
-
- if(levels>0){
-  document.getElementById('message').textContent=
-   '🎉 '+levels+' Levelaufstieg! +'+bonus+' Bonus-Münzen!';
- }else{
-  document.getElementById('message').textContent=
-   '+'+power+' XP · +'+money+' Münzen 💧';
- }
+ document.getElementById('message').textContent=levels>0?
+  '🎉 '+levels+' Levelaufstieg! +'+bonus+' Bonus-Münzen!':
+  '+'+power+' XP · +'+money+' Münzen 💧';
 }
-document.getElementById('water').addEventListener('click',waterTree);
+document.getElementById('water').onclick=waterTree;
 
 function closePanels(){
  document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
 }
 window.closePanels=closePanels;
-
 function showPanel(id){
  closePanels();
  document.getElementById(id).style.display='block';
 }
 
-function canUpgrade(i){
- return state.owned.includes(i)&&canLevel(i)<50;
-}
-
 function nextCanUnlocked(i){
- return i===0 || (state.owned.includes(i-1)&&canLevel(i-1)>=50);
+ return i===0||(state.owned.includes(i-1)&&canLevel(i-1)>=50);
 }
 
 function buildShop(){
  const el=document.getElementById('shopItems');
  el.innerHTML='';
-
  cans.forEach((c,i)=>{
   const owned=state.owned.includes(i);
   const lv=canLevel(i);
-  const power=canPower(i);
   const div=document.createElement('div');
   div.className='item';
-
   const top=document.createElement('div');
   top.className='itemtop';
-
   const info=document.createElement('div');
   const title=document.createElement('b');
   title.textContent='💧 '+c.name;
   const detail=document.createElement('small');
-
-  if(owned){
-   detail.textContent='Level '+lv+'/50 · '+power+' XP pro Gießen · '+Math.max(1,Math.floor(power*.5+state.level*2))+' Münzen pro Gießen';
-  }else{
-   detail.textContent='Basis: '+c.power+' XP pro Gießen · Preis: '+c.price.toLocaleString('de-DE')+' Münzen';
-  }
-
+  detail.textContent=owned?
+   'Level '+lv+'/50 · '+canPower(i)+' XP pro Gießen':
+   'Basis: '+c.power+' XP · Preis: '+c.price.toLocaleString('de-DE')+' Münzen';
   info.append(title,detail);
-  top.appendChild(info);
+  top.append(info);
 
   const btn=document.createElement('button');
-
   if(!owned){
-   if(!nextCanUnlocked(i)){
-    btn.textContent='🔒 Gesperrt';
-    btn.disabled=true;
-   }else{
-    btn.textContent='Kaufen';
-    btn.onclick=()=>{
-     if(state.coins<c.price){
-      document.getElementById('message').textContent='Du brauchst noch mehr Münzen!';
-      return;
-     }
-     state.coins-=c.price;
-     state.owned.push(i);
-     state.can=i;
-     updateCanAppearance();
-     updateUI();
-     buildShop();
-     document.getElementById('message').textContent='🎉 Neue Gießkanne gekauft!';
-    };
-   }
+   btn.textContent=nextCanUnlocked(i)?'Kaufen':'🔒 Gesperrt';
+   btn.disabled=!nextCanUnlocked(i);
+   btn.onclick=()=>{
+    if(state.coins<c.price){document.getElementById('message').textContent='Nicht genug Münzen!';return}
+    state.coins-=c.price;
+    state.owned.push(i);
+    state.can=i;
+    updateCanAppearance();updateUI();buildShop();
+   };
   }else if(state.can===i){
-   btn.textContent='Ausgerüstet';
-   btn.disabled=true;
+   btn.textContent='Ausgerüstet';btn.disabled=true;
   }else{
    btn.textContent='Ausrüsten';
-   btn.onclick=()=>{
-    state.can=i;
-    updateCanAppearance();
-    updateUI();
-    buildShop();
+   btn.onclick=()=>{state.can=i;updateCanAppearance();updateUI();buildShop()};
+  }
+  top.append(btn);
+  div.append(top);
+
+  if(owned&&lv<50){
+   const cost=upgradeCost(i);
+   const up=document.createElement('button');
+   up.textContent='⬆ Verbessern · '+cost.toLocaleString('de-DE')+' Münzen';
+   up.style.marginTop='8px';
+   up.onclick=()=>{
+    if(state.coins<cost){document.getElementById('message').textContent='Nicht genug Münzen!';return}
+    state.coins-=cost;state.canLevels[i]++;
+    updateUI();buildShop();
    };
+   div.append(up);
   }
-
-  top.appendChild(btn);
-  div.appendChild(top);
-
-  if(owned){
-   const bar=document.createElement('div');
-   bar.className='progress';
-   const fill=document.createElement('div');
-   fill.style.width=(lv/50*100)+'%';
-   bar.appendChild(fill);
-   div.appendChild(bar);
-
-   if(lv<50){
-    const upgrade=document.createElement('div');
-    upgrade.className='itemtop';
-    upgrade.style.marginTop='10px';
-
-    const cost=upgradeCost(i);
-    const text=document.createElement('small');
-    text.textContent='Nächstes Level: '+(lv+1)+' · Kosten: '+cost.toLocaleString('de-DE')+' Münzen';
-
-    const up=document.createElement('button');
-    up.textContent='⬆ Verbessern';
-    up.onclick=()=>{
-     if(state.coins<cost){
-      document.getElementById('message').textContent='Nicht genug Münzen für das Upgrade!';
-      return;
-     }
-     state.coins-=cost;
-     state.canLevels[i]++;
-     updateUI();
-     buildShop();
-     document.getElementById('message').textContent='✨ Gießkanne auf Level '+state.canLevels[i]+' verbessert!';
-    };
-
-    upgrade.append(text,up);
-    div.appendChild(upgrade);
-   }else{
-    const max=document.createElement('small');
-    max.textContent='🏆 MAXIMALES LEVEL! Die nächste Gießkanne ist freigeschaltet.';
-    max.style.color='#d6d98b';
-    div.appendChild(max);
-   }
-  }else if(!nextCanUnlocked(i)){
-   const locked=document.createElement('small');
-   locked.className='locked';
-   locked.textContent='Erreiche Level 50 mit der vorherigen Gießkanne.';
-   div.appendChild(locked);
-  }
-
-  el.appendChild(div);
+  el.append(div);
  });
 }
-
-document.getElementById('shopBtn').onclick=()=>{
- buildShop();
- showPanel('shop');
-};
+document.getElementById('shopBtn').onclick=()=>{buildShop();showPanel('shop')};
 
 function buildInventory(){
  const el=document.getElementById('inventoryItems');
  el.innerHTML='';
-
  state.owned.forEach(i=>{
   const div=document.createElement('div');
   div.className='item';
   const top=document.createElement('div');
   top.className='itemtop';
-
   const info=document.createElement('div');
   const title=document.createElement('b');
   title.textContent='💧 '+cans[i].name;
   const detail=document.createElement('small');
   detail.textContent='Level '+canLevel(i)+'/50 · '+canPower(i)+' XP pro Gießen';
   info.append(title,detail);
-
   const btn=document.createElement('button');
   btn.textContent=state.can===i?'Ausgerüstet':'Ausrüsten';
   btn.disabled=state.can===i;
-  btn.onclick=()=>{
-   state.can=i;
-   updateCanAppearance();
-   updateUI();
-   buildInventory();
-  };
-
-  top.append(info,btn);
-  div.appendChild(top);
-  el.appendChild(div);
+  btn.onclick=()=>{state.can=i;updateCanAppearance();updateUI();buildInventory()};
+  top.append(info,btn);div.append(top);el.append(div);
  });
 }
-
-document.getElementById('inventoryBtn').onclick=()=>{
- buildInventory();
- showPanel('inventory');
-};
+document.getElementById('inventoryBtn').onclick=()=>{buildInventory();showPanel('inventory')};
 
 function buildTrees(){
  const el=document.getElementById('treeItems');
  el.innerHTML='';
-
  treeNames.forEach((name,i)=>{
-  const unlocked=state.level>=unlocks[i];
   const div=document.createElement('div');
   div.className='item';
-  const top=document.createElement('div');
-  top.className='itemtop';
-
-  const title=document.createElement('b');
-  title.textContent=(unlocked?'🌳 ':'🔒 ')+name;
-  const level=document.createElement('span');
-  level.textContent='Level '+unlocks[i];
-
-  top.append(title,level);
-  div.appendChild(top);
-  el.appendChild(div);
+  div.textContent=(state.level>=unlocks[i]?'🌳 ':'🔒 ')+name+' · Level '+unlocks[i];
+  el.append(div);
  });
 }
+document.getElementById('treesBtn').onclick=()=>{buildTrees();showPanel('trees')};
 
-document.getElementById('treesBtn').onclick=()=>{
- buildTrees();
- showPanel('trees');
+// Verstecktes Admin-Menü: fünfmal auf Level tippen, Code 2203
+let tapCount=0,tapTimer;
+document.getElementById('level').onclick=()=>{
+ tapCount++;
+ clearTimeout(tapTimer);
+ tapTimer=setTimeout(()=>tapCount=0,1800);
+ if(tapCount>=5){
+  tapCount=0;
+  const code=prompt('Besitzer-Code eingeben:');
+  if(code==='2203')showPanel('admin');
+  else if(code!==null)document.getElementById('message').textContent='Falscher Code!';
+ }
 };
 
-/* VERSTECKTER BESITZER-ZUGANG:
-   5-mal auf die Level-Zahl tippen, danach Code 2203 eingeben. */
-let adminTapCount=0;
-let adminTapTimer=null;
-
-document.getElementById('level').addEventListener('click',()=>{
- adminTapCount++;
- clearTimeout(adminTapTimer);
- adminTapTimer=setTimeout(()=>adminTapCount=0,1800);
-
- if(adminTapCount>=5){
-  adminTapCount=0;
-  const code=prompt('Besitzer-Code eingeben:');
-  if(code==='2203'){
-   showPanel('admin');
-   document.getElementById('message').textContent='🔓 Besitzer-Menü geöffnet';
-  }else if(code!==null){
-   document.getElementById('message').textContent='❌ Falscher Code!';
-  }
- }
-});
-
-function adminRefresh(){
- makeTree();
- updateCanAppearance();
- updateUI();
- buildShop();
- buildInventory();
- buildTrees();
+function refreshAdmin(){
+ makeTree();updateCanAppearance();updateUI();buildShop();buildInventory();buildTrees();
+}
+function giveMoney(){
+ state.coins=999999999999999;
+ refreshAdmin();
+ document.getElementById('message').textContent='🪙 Sehr viel Geld erhalten!';
+}
+function setLevel(value){
+ const n=Math.floor(Number(value));
+ if(!Number.isFinite(n)||n<1)return;
+ state.level=Math.min(1000000,n);
+ state.xp=0;
+ refreshAdmin();
+ document.getElementById('message').textContent='⭐ Level '+state.level.toLocaleString('de-DE')+' erreicht!';
+}
+function unlockAll(){
+ state.owned=cans.map((c,i)=>i);
+ refreshAdmin();
+}
+function maxCans(){
+ state.owned=cans.map((c,i)=>i);
+ state.canLevels=cans.map(()=>50);
+ state.can=9;
+ refreshAdmin();
+}
+function everything(){
+ state.coins=999999999999999;
+ state.level=1000000;
+ state.xp=0;
+ state.owned=cans.map((c,i)=>i);
+ state.canLevels=cans.map(()=>50);
+ state.can=9;
+ refreshAdmin();
+ document.getElementById('message').textContent='👑 Alles freigeschaltet!';
 }
 
-function giveMoney(){
- state.coins=999
+document.getElementById('setLevelBtn').onclick=()=>setLevel(document.getElementById('adminLevelInput').value);
+document.getElementById('maxLevelBtn').onclick=()=>setLevel(1000000);
+document.getElementById('moneyBtn').onclick=giveMoney;
+document.getElementById('allUnlockBtn').onclick=unlockAll;
+document.getElementById('maxCansBtn').onclick=maxCans;
+document.getElementById('everythingBtn').onclick=everything;
+
+function animate(){
+ requestAnimationFrame(animate);
+ if(waterTimer>0){
+  waterTimer-=.025;
+  if(waterLine)waterLine.visible=waterTimer>0;
+ }
+ renderer.render(scene,camera);
+}
+animate();
+
+addEventListener('resize',()=>{
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+</body>
+ </html>
+
