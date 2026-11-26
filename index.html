@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TREE EVOLUTION</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#101914;color:white;
+ font-family:Arial,sans-serif;
+ text-align:center;padding:20px;
+}
+header{font-size:25px;font-weight:bold;margin:15px}
+.stats{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.stat{
+ background:#1c2b22;padding:15px 25px;
+ border-radius:14px;min-width:125px;
+}
+.stat span{color:#9bd6a5;font-size:13px}
+.stat strong{display:block;font-size:22px;margin-top:6px}
+main{
+ max-width:500px;margin:25px auto;
+ background:#1a2920;padding:25px;border-radius:22px;
+}
+#tree{
+ font-size:110px;cursor:pointer;
+ user-select:none;transition:transform .15s;
+ display:inline-block;
+}
+#tree:active{transform:scale(.9)}
+.bar{
+ height:12px;background:#304537;border-radius:20px;
+ overflow:hidden;margin:15px 0;
+}
+#progress{height:100%;width:0%;background:#48d477}
+button{
+ border:0;border-radius:12px;padding:13px 18px;
+ background:#35b968;color:white;font-weight:bold;
+ cursor:pointer;margin:5px;
+}
+button:hover{filter:brightness(1.1)}
+.shop{
+ max-width:500px;margin:20px auto;
+ background:#1a2920;padding:20px;border-radius:18px;
+}
+.upgrade{
+ display:flex;justify-content:space-between;
+ align-items:center;gap:10px;
+ border-bottom:1px solid #304537;padding:12px 0;
+ text-align:left;
+}
+.small{color:#a8b8ad;font-size:13px}
+</style>
+</head>
+<body>
+
+<header>🌳 TREE EVOLUTION</header>
+
+<div class="stats">
+ <div class="stat">
+  <span>🪙 MÜNZEN</span>
+  <strong id="coins">100</strong>
+ </div>
+ <div class="stat">
+  <span>⭐ LEVEL</span>
+  <strong id="level">1</strong>
+ </div>
+ <div class="stat">
+  <span>⚡ XP</span>
+  <strong id="xp">0 / 100</strong>
+ </div>
+</div>
+
+<main>
+ <p id="treeName">Dein kleiner Baum</p>
+ <div id="tree" onclick="clickTree()">🌱</div>
+ <div class="bar"><div id="progress"></div></div>
+ <p id="message">Klicke auf deinen Baum!</p>
+ <button onclick="clickTree()">🌳 BAUM ANKLICKEN</button>
+</main>
+
+<div class="shop">
+ <h2>🛒 UPGRADES</h2>
+ <div class="upgrade">
+  <div>⚡ Stärkerer Klick<br>
+  <span class="small">+1 XP pro Klick</span></div>
+  <button onclick="buyUpgrade()">100 🪙</button>
+ </div>
+ <div class="upgrade">
+  <div>💰 Münzbonus<br>
+  <span class="small">Doppelte Münzen pro Klick</span></div>
+  <button onclick="buyCoinUpgrade()">200 🪙</button>
+ </div>
+</div>
+
+<script>
+let coins=100;
+let level=1;
+let xp=0;
+let clickPower=1;
+let coinPower=1;
+
+const trees=[
+ "🌱","🌿","🌳","🌲","🌸","🌴",
+ "🍁","🌳","🎄","✨","🌟","🌌"
+];
+
+function clickTree(){
+ xp+=clickPower;
+ coins+=coinPower;
+ checkLevel();
+ update();
+}
+
+function checkLevel(){
+ while(xp>=100){
+  xp-=100;
+  level++;
+  document.getElementById("message").textContent=
+   "🎉 Neues Level! Dein Baum entwickelt sich!";
+ }
+}
+
+function buyUpgrade(){
+ if(coins>=100){
+  coins-=100;
+  clickPower++;
+  update();
+ }
+}
+
+function buyCoinUpgrade(){
+ if(coins>=200){
+  coins-=200;
+  coinPower*=2;
+  update();
+ }
+}
+
+function update(){
+ document.getElementById("coins").textContent=
+  coins.toLocaleString("de-DE");
+ document.getElementById("level").textContent=level;
+ document.getElementById("xp").textContent=xp+" / 100";
+ document.getElementById("progress").style.width=xp+"%";
+
+ let stage=Math.min(3,Math.floor(xp/25));
+ let treeIndex=Math.min(trees.length-1,Math.floor((level-1)/5));
+ document.getElementById("tree").textContent=
+  trees[treeIndex];
+ document.getElementById("treeName").textContent=
+  "Baum "+(treeIndex+1)+" · Wachstumsstufe "+(stage+1);
+}
+
+update();
+</script>
+</body>
+</html>
