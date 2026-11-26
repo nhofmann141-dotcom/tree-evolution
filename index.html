@@ -3,707 +3,397 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TREE EVOLUTION</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tree Evolution</title>
 <style>
 *{box-sizing:border-box}
-body{
- margin:0;background:#101711;color:#e8efdf;
- font-family:Arial,sans-serif;
-}
-header{
- height:70px;background:#17251b;border-bottom:1px solid #40543b;
- display:flex;justify-content:space-around;align-items:center;
- position:relative;z-index:2;
-}
-.stat{text-align:center;font-size:11px;color:#a9b9a9;font-weight:bold}
-.stat span{display:block;font-size:17px;color:#e0e9cb;margin-top:5px}
-main{max-width:720px;margin:auto;padding:12px}
-h1{text-align:center;color:#d8e6c4;font-size:25px;letter-spacing:3px;margin:13px 0 5px}
-.sub{text-align:center;color:#899b83;font-size:11px;letter-spacing:2px}
-#game{
- height:470px;margin-top:15px;position:relative;overflow:hidden;
- border:1px solid #40533b;border-radius:18px;
- background:#14231b;box-shadow:0 10px 35px #0009;
-}
-#view{width:100%;height:100%;display:block;touch-action:none}
-#treeLabel{
- position:absolute;top:14px;left:0;right:0;text-align:center;
- color:#e0e8d0;font-weight:bold;text-shadow:0 2px 8px #000;
- pointer-events:none;
-}
-#levelLabel{
- position:absolute;bottom:13px;left:0;right:0;text-align:center;
- color:#e0e8d0;font-size:12px;text-shadow:0 2px 8px #000;
- pointer-events:none;
-}
-.progress{height:9px;background:#293b2c;border-radius:20px;margin:12px 2px;overflow:hidden}
-#bar{height:100%;width:0;background:linear-gradient(90deg,#668e49,#c4d68b);transition:width .2s}
-.buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:13px}
-button{
- border:1px solid #496044;border-radius:12px;background:#1c2d20;
- color:#e0ead8;padding:14px;font-weight:bold;font-size:14px;cursor:pointer;
-}
-button:active{transform:scale(.98)}
-.water{
- grid-column:1/-1;background:#355c3c;border-color:#78966b;
- font-size:18px;padding:17px;
-}
-.section{background:#18271c;border:1px solid #304532;border-radius:15px;padding:14px;margin-top:14px}
-.section h2{font-size:16px;margin:0 0 10px;color:#d5e6c7}
-#collection{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.treeCard{background:#243729;border:1px solid #3c5740;border-radius:10px;text-align:center;padding:10px;font-size:12px}
-.treeCard b{display:block;font-size:23px;margin-bottom:4px}
-.overlay{
- display:none;position:fixed;inset:0;background:#000c;z-index:10;
- align-items:center;justify-content:center;padding:12px;
-}
-.panel{
- width:100%;max-width:540px;max-height:88vh;overflow:auto;
- background:#17251b;border:1px solid #496348;border-radius:18px;padding:15px;
-}
-.paneltop{display:flex;justify-content:space-between;align-items:center}
-.paneltop h2{font-size:19px}
-.close{background:#3b2929;border-color:#694444}
-.items{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
-.item{background:#223328;border:1px solid #405842;border-radius:12px;padding:12px;text-align:center}
-.item .emoji{font-size:32px}
-.item h3{font-size:14px;margin:6px}
-.item p{font-size:12px;color:#a9bea5}
-.item button{width:100%;padding:10px;background:#3d6542}
-#toast{
- position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
- background:#304b34;color:white;padding:12px 18px;border-radius:25px;
- z-index:20;opacity:0;transition:.2s;pointer-events:none;
-}
-.hint{text-align:center;color:#80927c;font-size:11px;margin-top:9px}
+body{margin:0;background:#101812;color:#fff;font-family:Arial,sans-serif;overflow:hidden}
+#game{position:fixed;inset:0}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.hud{position:absolute;top:12px;left:10px;right:10px;display:flex;justify-content:space-around;gap:6px;z-index:5}
+.stat{background:#17251de8;border:1px solid #526b50;border-radius:12px;padding:9px 12px;text-align:center;min-width:85px;box-shadow:0 4px 15px #0007}
+.stat small{display:block;color:#a9c29e;font-size:11px}
+.stat strong{font-size:17px}
+.xpbox{position:absolute;top:83px;left:12%;width:76%;height:9px;background:#263328;border-radius:20px;overflow:hidden;z-index:5}
+#xpbar{height:100%;width:0%;background:linear-gradient(90deg,#7da85b,#d0d78a);transition:width .3s}
+#leveltext{position:absolute;top:98px;width:100%;text-align:center;font-size:12px;color:#d5e2cc;z-index:5}
+.actions{position:absolute;bottom:18px;left:0;right:0;display:flex;justify-content:center;gap:9px;z-index:6;flex-wrap:wrap;padding:0 8px}
+button{border:1px solid #728b64;background:#263d2c;color:white;border-radius:13px;padding:13px 17px;font-size:14px;font-weight:bold;cursor:pointer;touch-action:manipulation}
+button:active{transform:scale(.96);background:#45683e}
+#water{background:#597d43;border-color:#9ab47a;padding:15px 24px;font-size:16px}
+.panel{display:none;position:absolute;z-index:10;left:5%;right:5%;top:18%;max-height:65%;overflow:auto;background:#17251df5;border:1px solid #71866a;border-radius:18px;padding:18px;box-shadow:0 10px 40px #000b}
+.panel h2{margin-top:0}
+.item{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #405442;padding:12px 0}
+.item button{padding:9px 12px}
+#message{position:absolute;top:125px;left:0;right:0;text-align:center;color:#e4edcf;font-weight:bold;z-index:5;text-shadow:0 2px 5px black}
 </style>
 </head>
-
 <body>
-<header>
- <div class="stat">🪙 MÜNZEN<span id="coins">100</span></div>
- <div class="stat">⭐ LEVEL<span id="level">1</span></div>
- <div class="stat">✨ XP<span id="xp">0</span></div>
-</header>
+<div id="game"></div>
 
-<main>
-<h1>TREE EVOLUTION</h1>
-<div class="sub">GROW YOUR MAGICAL FOREST</div>
-
-<div id="game">
- <div id="treeLabel">🌳 Eichenbaum</div>
- <canvas id="view"></canvas>
- <div id="levelLabel">LEVEL 1 • WACHSTUM 0%</div>
+<div class="hud">
+ <div class="stat"><small>🪙 MÜNZEN</small><strong id="coins">0</strong></div>
+ <div class="stat"><small>⭐ LEVEL</small><strong id="level">1</strong></div>
+ <div class="stat"><small>🌱 XP</small><strong id="xp">0/100</strong></div>
 </div>
-<div class="hint">Du kannst die Kamera mit deinem Finger drehen.</div>
+<div class="xpbox"><div id="xpbar"></div></div>
+<div id="leveltext">Dein Baum entwickelt sich</div>
+<div id="message">Dein Baum wartet auf Wasser 🌳</div>
 
-<div class="progress"><div id="bar"></div></div>
-
-<div class="buttons">
- <button class="water" onclick="waterTree()">💧 BAUM BEWÄSSERN</button>
- <button onclick="openPanel('shop')">🛒 SHOP</button>
- <button onclick="openPanel('inventory')">🎒 INVENTAR</button>
+<div class="actions">
+ <button id="water">💧 Gießen</button>
+ <button id="shopBtn">🛒 Shop</button>
+ <button id="inventoryBtn">🎒 Inventar</button>
+ <button id="treesBtn">🌳 Bäume</button>
 </div>
 
-<div class="section">
- <h2>🌲 DEINE BÄUME</h2>
- <div id="collection"></div>
+<div class="panel" id="shop">
+ <h2>🛒 Gießkannen-Shop</h2>
+ <div id="shopItems"></div>
+ <button onclick="closePanels()">Schließen</button>
 </div>
-</main>
-
-<div class="overlay" id="shop">
- <div class="panel">
-  <div class="paneltop">
-   <h2>🛒 GIEẞKANNEN-SHOP</h2>
-   <button class="close" onclick="closePanel('shop')">✕</button>
-  </div>
-  <p style="color:#a9bea5">Sammle seltene Gießkannen.</p>
-  <div class="items" id="shopItems"></div>
- </div>
+<div class="panel" id="inventory">
+ <h2>🎒 Dein Inventar</h2>
+ <div id="inventoryItems"></div>
+ <button onclick="closePanels()">Schließen</button>
 </div>
-
-<div class="overlay" id="inventory">
- <div class="panel">
-  <div class="paneltop">
-   <h2>🎒 INVENTAR</h2>
-   <button class="close" onclick="closePanel('inventory')">✕</button>
-  </div>
-  <div class="items" id="inventoryItems"></div>
- </div>
+<div class="panel" id="trees">
+ <h2>🌳 Baum-Sammlung</h2>
+ <div id="treeItems"></div>
+ <button onclick="closePanels()">Schließen</button>
 </div>
 
-<div id="toast"></div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-<script>
-const trees=[
- {name:"Eichenbaum",emoji:"🌳",level:1,colors:[0x244b2b,0x365d32,0x183923]},
- {name:"Candy Tree",emoji:"🍬",level:3,colors:[0x9e477d,0xd26ba7,0x6b315c]},
- {name:"Engelbaum",emoji:"😇",level:5,colors:[0xb9a86c,0xe1d5a0,0x8c8152]},
- {name:"Teufelsbaum",emoji:"😈",level:8,colors:[0x822e2e,0xb33b32,0x511e25]},
- {name:"Kristallbaum",emoji:"💎",level:12,colors:[0x367f8b,0x59b8c4,0x24505e]},
- {name:"Goldbaum",emoji:"🌟",level:16,colors:[0xa17a30,0xd3ad50,0x76531d]},
- {name:"Galaxy-Baum",emoji:"🌌",level:20,colors:[0x49316e,0x7950a3,0x302044]},
- {name:"Eisbaum",emoji:"❄️",level:25,colors:[0x477e91,0x80b7c5,0x345566]},
- {name:"Feuerbaum",emoji:"🔥",level:30,colors:[0x8b3824,0xc75b29,0x63251e]},
- {name:"Regenbogenbaum",emoji:"🌈",level:40,colors:[0x86528b,0x5e78a5,0x416c68]}
+const container=document.getElementById('game');
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x111b18);
+scene.fog=new THREE.Fog(0x111b18,12,28);
+
+const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,100);
+camera.position.set(0,5.2,10);
+camera.lookAt(0,2,0);
+
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+container.appendChild(renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0xc8dfc4,0x283522,2));
+const moonLight=new THREE.DirectionalLight(0xe0edcf,2.2);
+moonLight.position.set(-4,8,5);
+moonLight.castShadow=true;
+scene.add(moonLight);
+
+const ground=new THREE.Mesh(
+ new THREE.CircleGeometry(9,64),
+ new THREE.MeshStandardMaterial({color:0x263d2b,roughness:1})
+);
+ground.rotation.x=-Math.PI/2;
+ground.position.y=-.08;
+ground.receiveShadow=true;
+scene.add(ground);
+
+const island=new THREE.Mesh(
+ new THREE.CylinderGeometry(5.5,5.9,.45,64),
+ new THREE.MeshStandardMaterial({color:0x314b32,roughness:1})
+);
+island.position.y=-.32;
+island.receiveShadow=true;
+scene.add(island);
+
+const moon=new THREE.Mesh(
+ new THREE.SphereGeometry(.65,32,32),
+ new THREE.MeshBasicMaterial({color:0xd8dfbd})
+);
+moon.position.set(-4.5,6,-5);
+scene.add(moon);
+
+for(let i=0;i<18;i++){
+ const h=2+Math.random()*3;
+ const tree=new THREE.Group();
+ const trunk=new THREE.Mesh(
+  new THREE.CylinderGeometry(.12,.22,h,7),
+  new THREE.MeshStandardMaterial({color:0x30251c})
+ );
+ trunk.position.y=h/2;
+ tree.add(trunk);
+ const leaves=new THREE.Mesh(
+  new THREE.ConeGeometry(.9,h*.65,7),
+  new THREE.MeshStandardMaterial({color:0x18291e})
+ );
+ leaves.position.y=h*.85;
+ tree.add(leaves);
+ const a=Math.random()*Math.PI*2;
+ const r=7+Math.random()*3;
+ tree.position.set(Math.cos(a)*r,0,Math.sin(a)*r-2);
+ scene.add(tree);
+}
+
+const treeGroup=new THREE.Group();
+scene.add(treeGroup);
+
+const palettes=[
+ [0x315b32,0x416b38],
+ [0xd85c9c,0xf5a6d4],
+ [0xe8d8a1,0xffffff],
+ [0x5a1723,0x9d2635],
+ [0x58d9e6,0xa9f8ff],
+ [0xd5a52b,0xffdf76],
+ [0x392c78,0x8069d8],
+ [0x9bdcf0,0xe4faff],
+ [0xe85b26,0xffa12e],
+ [0x66d7a1,0xd0ff9c]
 ];
-
-const cans=[
- {id:0,name:"Alte Holzkanne",emoji:"🪣",price:0,power:1,color:0x705039},
- {id:1,name:"Mooskanne",emoji:"🌿",price:100,power:2,color:0x486a3b},
- {id:2,name:"Waldkanne",emoji:"🍃",price:250,power:3,color:0x315b32},
- {id:3,name:"Candy-Kanne",emoji:"🍬",price:500,power:5,color:0xc65c9a},
- {id:4,name:"Engelskanne",emoji:"😇",price:900,power:8,color:0xd8c88d},
- {id:5,name:"Teufelskanne",emoji:"😈",price:1400,power:11,color:0x9e302c},
- {id:6,name:"Kristallkanne",emoji:"💎",price:2200,power:15,color:0x4da9bc},
- {id:7,name:"Goldkanne",emoji:"🏆",price:3500,power:20,color:0xd2a63c},
- {id:8,name:"Galaxy-Kanne",emoji:"🌌",price:6000,power:28,color:0x72509e},
- {id:9,name:"Regenbogenkanne",emoji:"🌈",price:10000,power:40,color:0x8a75b8},
- {id:10,name:"Sternenkanne",emoji:"⭐",price:18000,power:60,color:0xd8d5a1},
- {id:11,name:"Drachenkanne",emoji:"🐉",price:30000,power:90,color:0x47774d}
+const treeNames=[
+'Eichenbaum','Candy Tree','Engelbaum','Teufelsbaum',
+'Kristallbaum','Goldbaum','Galaxy-Baum','Eisbaum',
+'Feuerbaum','Regenbogenbaum'
 ];
+const unlocks=[1,3,5,8,12,16,20,25,30,40];
 
-let state={coins:100,xp:0,level:1,growth:0,owned:[0],equipped:0};
+let state={
+ coins:0,level:1,xp:0,can:0,
+ owned:[0]
+};
+
 try{
- const saved=JSON.parse(localStorage.getItem("treeEvolutionDark"));
- if(saved)state={...state,...saved};
+ const saved=localStorage.getItem('treeEvolutionSave');
+ if(saved)state={...state,...JSON.parse(saved)};
 }catch(e){}
 
-let scene,camera,renderer,treeGroup,canGroup;
-let waterParticles=[];
-let watering=false,angle=0,height=4.5;
-let dragging=false,lastX=0,lastY=0;
-const canvas=document.getElementById("view");
-
-function mat(color,roughness=.85){
- return new THREE.MeshStandardMaterial({color,roughness});
-}
-function addSphere(parent,pos,scale,material,detail=2){
- const mesh=new THREE.Mesh(new THREE.IcosahedronGeometry(1,detail),material);
- mesh.position.set(...pos);
- mesh.scale.set(...scale);
- mesh.castShadow=true;
- mesh.receiveShadow=true;
- parent.add(mesh);
- return mesh;
-}
-function addBranch(parent,points,radius,material){
- const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));
- const mesh=new THREE.Mesh(
-  new THREE.TubeGeometry(curve,20,radius,8,false),material
- );
- mesh.castShadow=true;
- mesh.receiveShadow=true;
- parent.add(mesh);
- return mesh;
-}
-function betweenCylinder(parent,a,b,radius,material){
- const start=new THREE.Vector3(...a);
- const end=new THREE.Vector3(...b);
- const direction=new THREE.Vector3().subVectors(end,start);
- const mesh=new THREE.Mesh(
-  new THREE.CylinderGeometry(radius*.7,radius,direction.length(),10),material
- );
- mesh.position.copy(start).add(end).multiplyScalar(.5);
- mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());
- mesh.castShadow=true;
- parent.add(mesh);
- return mesh;
+function save(){
+ try{localStorage.setItem('treeEvolutionSave',JSON.stringify(state))}catch(e){}
 }
 
-/* BAUM */
 function makeTree(){
- treeGroup=new THREE.Group();
- scene.add(treeGroup);
+ while(treeGroup.children.length)treeGroup.remove(treeGroup.children[0]);
 
- const type=[...trees].reverse().find(t=>state.level>=t.level)||trees[0];
- const leaves=type.colors.map(c=>mat(c));
- const bark=mat(0x493021);
- const barkLight=mat(0x65442e);
- const darkBark=mat(0x302016);
-
- // Breiter, leicht geschwungener Hauptstamm
- addBranch(treeGroup,[
-  [0,0,0],[.02,.7,0],[-.06,1.5,.02],[.04,2.2,0],[0,2.9,0]
- ],.24,bark);
-
- // Wurzeln
- for(let i=0;i<7;i++){
-  const a=i*Math.PI*2/7;
-  const x=Math.cos(a),z=Math.sin(a);
-  addBranch(treeGroup,[
-   [0,.38,0],[x*.28,.18,z*.28],[x*.65,.04,z*.65],[x*.9,.03,z*.9]
-  ],.09,barkLight);
- }
-
- // Große Äste
- const branches=[
-  [[0,1.5,0],[-.35,2,.05],[-.85,2.6,.1],[-1.15,3,.1]],
-  [[0,1.8,0],[.35,2.3,0],[.8,2.8,.1],[1.2,3.1,.1]],
-  [[0,2.1,0],[.05,2.7,-.3],[-.3,3.2,-.45],[-.55,3.5,-.5]],
-  [[0,2.2,0],[.15,2.8,.3],[.55,3.3,.45],[.8,3.6,.5]],
-  [[0,2.5,0],[-.1,3.1,0],[-.15,3.7,0],[.05,4.1,0]],
-  [[0,1.7,0],[-.2,2.1,-.4],[-.5,2.6,-.7],[-.8,2.8,-.8]]
+ const index=Math.max(0,unlocks.findLastIndex(n=>state.level>=n));
+ const colors=palettes[index];
+ const bark=new THREE.MeshStandardMaterial({color:0x503522,roughness:1});
+ const leaves=[
+  new THREE.MeshStandardMaterial({color:colors[0],roughness:.9}),
+  new THREE.MeshStandardMaterial({color:colors[1],roughness:.9})
  ];
- branches.forEach((p,i)=>addBranch(treeGroup,p,.11-(i*.008),barkLight));
 
- // Kleine Seitenäste
- for(let i=0;i<14;i++){
-  const a=i*2.4;
-  const x=Math.cos(a),z=Math.sin(a);
-  const y=2.5+(i%4)*.35;
-  addBranch(treeGroup,[
-   [x*.25,y-.35,z*.25],
-   [x*.55,y,z*.55],
-   [x*.85,y+.3,z*.85]
-  ],.045,bark);
- }
+ const trunk=new THREE.Mesh(
+  new THREE.CylinderGeometry(.28,.48,2.5,12),
+  bark
+ );
+ trunk.position.y=1.25;
+ trunk.castShadow=true;
+ treeGroup.add(trunk);
 
- // Rindenstruktur
- for(let i=0;i<10;i++){
-  const a=i*2.4;
-  const y=.5+(i%5)*.35;
-  addBranch(treeGroup,[
-   [Math.cos(a)*.19,y,Math.sin(a)*.19],
-   [Math.cos(a)*.24,y+.22,Math.sin(a)*.24]
-  ],.018,darkBark);
- }
-
- // Unregelmäßige große Blattgruppen
- const clusters=[
-  [0,3.45,0,1.05,1.0,.9],
-  [-.85,3.15,.05,.75,.8,.7],
-  [.82,3.25,.1,.8,.82,.75],
-  [-.55,3.8,.45,.72,.75,.7],
-  [.58,3.9,-.35,.76,.8,.7],
-  [0,4.35,0,.75,.72,.72],
-  [-1.15,3.6,-.25,.52,.6,.55],
-  [1.15,3.65,.25,.55,.6,.55],
-  [-.35,2.9,.65,.6,.58,.6],
-  [.48,2.95,.55,.62,.65,.58],
-  [-.55,4.15,-.45,.5,.57,.5],
-  [.6,4.2,.4,.53,.55,.5]
- ];
- clusters.forEach((p,i)=>{
-  addSphere(treeGroup,p.slice(0,3),p.slice(3),leaves[i%3],2);
- });
-
- // Zusätzliche kleine Blätter für mehr Volumen
- for(let i=0;i<34;i++){
-  const a=i*2.399;
-  const r=.45+(i%5)*.17;
-  const y=2.9+(i%7)*.19;
-  addSphere(
-   treeGroup,
-   [Math.cos(a)*r,y,Math.sin(a)*r],
-   [.22,.2,.22],
-   leaves[i%3],1
+ for(let i=0;i<5;i++){
+  const root=new THREE.Mesh(
+   new THREE.CylinderGeometry(.04,.2,1,7),
+   bark
   );
+  root.position.set(Math.cos(i*1.25)*.43,.25,Math.sin(i*1.25)*.43);
+  root.rotation.z=Math.cos(i*1.25)*.65;
+  root.rotation.x=Math.sin(i*1.25)*.65;
+  treeGroup.add(root);
  }
 
- // Dezente Lichtpunkte an besonderen Bäumen
- if(state.level>=5){
-  const ring=new THREE.Mesh(
-   new THREE.TorusGeometry(1.35,.025,8,64),
-   new THREE.MeshStandardMaterial({color:0xc9b77b,emissive:0x554322})
+ for(let i=0;i<13;i++){
+  const angle=i*2.4;
+  const branch=new THREE.Mesh(
+   new THREE.CylinderGeometry(.045,.12,1.2,7),
+   bark
   );
-  ring.position.y=4.85;
-  treeGroup.add(ring);
- }
- if(state.level>=8){
-  for(let i=0;i<2;i++){
-   const horn=new THREE.Mesh(
-    new THREE.ConeGeometry(.14,.5,10),
-    mat(0x291b1b)
-   );
-   horn.position.set(i?-.65:.65,4.45,0);
-   horn.rotation.z=i?-.4:.4;
-   treeGroup.add(horn);
-  }
+  branch.position.set(Math.cos(angle)*.65,2+Math.random()*.7,Math.sin(angle)*.55);
+  branch.rotation.z=Math.cos(angle)*-.7;
+  branch.rotation.x=Math.sin(angle)*.7;
+  treeGroup.add(branch);
  }
 
- // Jedes Level beginnt wieder klein und wächst bis zum nächsten Level.
+ for(let i=0;i<17;i++){
+  const a=i*2.4;
+  const r=.6+Math.random()*.55;
+  const leaf=new THREE.Mesh(
+   new THREE.IcosahedronGeometry(.75+Math.random()*.25,2),
+   leaves[i%2]
+  );
+  leaf.position.set(Math.cos(a)*r,2.9+Math.random()*1.25,Math.sin(a)*r);
+  leaf.scale.set(1.1,1,.95);
+  leaf.castShadow=true;
+  treeGroup.add(leaf);
+ }
+
  treeGroup.scale.setScalar(.72+(state.xp/100)*.58);
+ treeGroup.position.y=0;
 }
+makeTree();
 
-/* REALISTISCHERE GIESSKANNE */
-function makeCan(){
- canGroup=new THREE.Group();
- scene.add(canGroup);
+const canGroup=new THREE.Group();
+scene.add(canGroup);
+const metal=new THREE.MeshStandardMaterial({color:0x9aaf91,metalness:.65,roughness:.3});
+const darkMetal=new THREE.MeshStandardMaterial({color:0x536b58,metalness:.5,roughness:.4});
 
- const c=cans.find(v=>v.id===state.equipped)||cans[0];
- const metal=new THREE.MeshStandardMaterial({
-  color:c.color,metalness:.45,roughness:.3
- });
- const dark=mat(0x302b23,.5);
- const silver=new THREE.MeshStandardMaterial({
-  color:0x8e9b8a,metalness:.7,roughness:.25
- });
+const body=new THREE.Mesh(new THREE.CylinderGeometry(.35,.42,.65,24),metal);
+body.position.set(2.05,.65,0);
+canGroup.add(body);
 
- // Runder Kannen-Körper
- const profile=[
-  new THREE.Vector2(0,0),
-  new THREE.Vector2(.2,.02),
-  new THREE.Vector2(.32,.12),
-  new THREE.Vector2(.34,.48),
-  new THREE.Vector2(.28,.65),
-  new THREE.Vector2(.12,.7),
-  new THREE.Vector2(0,.7)
- ];
- const body=new THREE.Mesh(new THREE.LatheGeometry(profile,32),metal);
- body.position.set(0,.08,0);
- body.castShadow=true;
- canGroup.add(body);
+const top=new THREE.Mesh(new THREE.CylinderGeometry(.35,.35,.1,24),darkMetal);
+top.position.set(2.05,1.02,0);
+canGroup.add(top);
 
- // Deckel
- const lid=new THREE.Mesh(
-  new THREE.CylinderGeometry(.14,.14,.07,24),dark
- );
- lid.position.set(0,.8,0);
- canGroup.add(lid);
+const handle=new THREE.Mesh(new THREE.TorusGeometry(.35,.065,10,24,Math.PI),darkMetal);
+handle.position.set(2.05,.85,0);
+handle.rotation.z=Math.PI;
+canGroup.add(handle);
 
- const knob=new THREE.Mesh(
-  new THREE.SphereGeometry(.07,16,12),metal
- );
- knob.position.set(0,.87,0);
- canGroup.add(knob);
+const spout=new THREE.Mesh(new THREE.CylinderGeometry(.07,.12,.9,12),metal);
+spout.position.set(2.7,.85,0);
+spout.rotation.z=-1.05;
+canGroup.add(spout);
 
- // Griff
- const handleCurve=new THREE.CatmullRomCurve3([
-  new THREE.Vector3(-.23,.68,0),
-  new THREE.Vector3(-.55,.83,0),
-  new THREE.Vector3(-.68,.55,0),
-  new THREE.Vector3(-.55,.25,0),
-  new THREE.Vector3(-.24,.25,0)
- ]);
- const handle=new THREE.Mesh(
-  new THREE.TubeGeometry(handleCurve,32,.055,10,false),dark
- );
- canGroup.add(handle);
+const nozzle=new THREE.Mesh(new THREE.SphereGeometry(.15,16,12),darkMetal);
+nozzle.position.set(3.08,1.2,0);
+canGroup.add(nozzle);
 
- // Langer gebogener Ausguss Richtung Baum
- const spoutCurve=new THREE.CatmullRomCurve3([
-  new THREE.Vector3(.23,.52,0),
-  new THREE.Vector3(.48,.62,0),
-  new THREE.Vector3(.75,.77,0),
-  new THREE.Vector3(.95,.82,0)
- ]);
- const spout=new THREE.Mesh(
-  new THREE.TubeGeometry(spoutCurve,24,.09,12,false),metal
- );
- spout.castShadow=true;
- canGroup.add(spout);
-
- // Brausekopf am Ende
- const head=new THREE.Mesh(
-  new THREE.SphereGeometry(.13,16,12),metal
- );
- head.position.set(.95,.82,0);
- head.scale.set(1,.55,1);
- canGroup.add(head);
-
- const nozzle=new THREE.Mesh(
-  new THREE.CylinderGeometry(.11,.09,.06,20),silver
- );
- nozzle.rotation.z=-Math.PI/2;
- nozzle.position.set(1.04,.82,0);
- canGroup.add(nozzle);
-
- // Kleine Löcher an der Brause
- for(let i=0;i<7;i++){
-  const a=i*Math.PI*2/7;
-  const dot=new THREE.Mesh(
-   new THREE.SphereGeometry(.018,8,8),
-   dark
-  );
-  dot.position.set(1.075,.82+Math.cos(a)*.065,Math.sin(a)*.065);
-  canGroup.add(dot);
- }
-
- canGroup.position.set(2.0,.12,.15);
- canGroup.rotation.y=-.3;
-}
-
-/* HINTERGRUND */
-function makeBackground(){
- // Himmel
- const sky=new THREE.Mesh(
-  new THREE.SphereGeometry(70,32,24),
-  new THREE.MeshBasicMaterial({color:0x101d29,side:THREE.BackSide})
- );
- scene.add(sky);
-
- // Mond
- const moon=new THREE.Mesh(
-  new THREE.SphereGeometry(1.0,32,24),
-  new THREE.MeshBasicMaterial({color:0xd6ddc4})
- );
- moon.position.set(-7,8,-15);
- scene.add(moon);
-
- const moonLight=new THREE.PointLight(0x9db9c2,45,35);
- moonLight.position.set(-7,8,-12);
- scene.add(moonLight);
-
- // Sterne
- const starMat=new THREE.MeshBasicMaterial({color:0xcbd5bb});
- for(let i=0;i<100;i++){
-  const star=new THREE.Mesh(
-   new THREE.SphereGeometry(.025+Math.random()*.025,6,6),starMat
-  );
-  star.position.set(
-   (Math.random()-.5)*35,
-   5+Math.random()*15,
-   -12-Math.random()*15
-  );
-  scene.add(star);
- }
-
- // Berge im Hintergrund
- for(let i=0;i<9;i++){
-  const mountain=new THREE.Mesh(
-   new THREE.ConeGeometry(2.5+Math.random()*2,5+Math.random()*4,5),
-   mat(i%2?0x1c302d:0x24352f)
-  );
-  mountain.position.set(-16+i*4,1.2,-13-Math.random()*4);
-  scene.add(mountain);
- }
-
- // Dunkle Hintergrundbäume
- for(let i=0;i<24;i++){
-  const x=(Math.random()-.5)*25;
-  const z=-5-Math.random()*10;
-  const h=2.5+Math.random()*2;
-  const trunk=new THREE.Mesh(
-   new THREE.CylinderGeometry(.12,.2,h,7),
-   mat(0x30251d)
-  );
-  trunk.position.set(x,h/2-.1,z);
-  scene.add(trunk);
-
-  for(let j=0;j<3;j++){
-   const top=new THREE.Mesh(
-    new THREE.ConeGeometry(.9-j*.16,1.8,7),
-    mat(j%2?0x1b3528:0x243e2d)
-   );
-   top.position.set(x,h*.55+j*.65,z);
-   scene.add(top);
-  }
- }
-
- // Bodennebel
- const fogLight=new THREE.PointLight(0x294c3b,10,18);
- fogLight.position.set(-3,1,-4);
- scene.add(fogLight);
-}
-
-/* WASSERSTRAHL */
-let stream=null;
-let streamGlow=null;
-
-function makeWaterStream(){
- const waterMat=new THREE.MeshBasicMaterial({
-  color:0x65c9ed,transparent:true,opacity:.85
- });
- const glowMat=new THREE.MeshBasicMaterial({
-  color:0x9deaff,transparent:true,opacity:.2
- });
-
- // Der Strahl geht vom Ausguss der Kanne zum Baum.
- const curve=new THREE.CatmullRomCurve3([
-  new THREE.Vector3(3.04,1.0,.15),
-  new THREE.Vector3(2.4,.85,.12),
-  new THREE.Vector3(1.4,.5,.08),
-  new THREE.Vector3(.35,.18,.02)
- ]);
-
- stream=new THREE.Mesh(
-  new THREE.TubeGeometry(curve,30,.035,8,false),waterMat
- );
- streamGlow=new THREE.Mesh(
-  new THREE.TubeGeometry(curve,30,.085,8,false),glowMat
- );
- stream.visible=false;
- streamGlow.visible=false;
- scene.add(streamGlow);
- scene.add(stream);
-}
-
-function makeDrop(){
- const drop=new THREE.Mesh(
-  new THREE.SphereGeometry(.045,10,8),
-  new THREE.MeshBasicMaterial({color:0x7bd9ff})
- );
- drop.position.set(3.04,1,.15);
- scene.add(drop);
-
- waterParticles.push({
-  mesh:drop,
-  progress:0,
-  start:new THREE.Vector3(3.04,1,.15),
-  end:new THREE.Vector3(.35,.18,.02),
-  arc:.45+Math.random()*.3
- });
-}
+const waterMaterial=new THREE.MeshStandardMaterial({
+ color:0x63caff,transparent:true,opacity:.8,
+ emissive:0x164d77
+});
+let waterLine=null;
+let waterTimer=0;
 
 function waterEffect(){
- watering=true;
- stream.visible=true;
- streamGlow.visible=true;
-
- for(let i=0;i<20;i++){
-  setTimeout(()=>makeDrop(),i*35);
- }
-
- setTimeout(()=>{
-  watering=false;
-  if(stream)stream.visible=false;
-  if(streamGlow)streamGlow.visible=false;
- },1000);
+ if(waterLine)scene.remove(waterLine);
+ const points=[
+  new THREE.Vector3(3.08,1.2,0),
+  new THREE.Vector3(2.4,.9,.1),
+  new THREE.Vector3(1.3,.35,.1),
+  new THREE.Vector3(.3,.08,.1)
+ ];
+ const curve=new THREE.CatmullRomCurve3(points);
+ waterLine=new THREE.Mesh(
+  new THREE.TubeGeometry(curve,24,.045,8,false),
+  waterMaterial
+ );
+ scene.add(waterLine);
+ waterTimer=1;
 }
 
-/* SPIEL */
-function init(){
- scene=new THREE.Scene();
- scene.background=new THREE.Color(0x101d29);
- scene.fog=new THREE.FogExp2(0x17251e,.025);
+const cans=[
+ {name:'Eichen-Kanne',price:0,power:10},
+ {name:'Engel-Kanne',price:100,power:15},
+ {name:'Teufel-Kanne',price:250,power:20},
+ {name:'Candy-Kanne',price:500,power:25},
+ {name:'Kristall-Kanne',price:1000,power:35},
+ {name:'Gold-Kanne',price:2500,power:45},
+ {name:'Galaxy-Kanne',price:5000,power:60},
+ {name:'Drachen-Kanne',price:10000,power:80}
+];
 
- camera=new THREE.PerspectiveCamera(43,1,.1,100);
+function updateUI(){
+ document.getElementById('coins').textContent=state.coins;
+ document.getElementById('level').textContent=state.level;
+ document.getElementById('xp').textContent=state.xp+'/100';
+ document.getElementById('xpbar').style.width=state.xp+'%';
+ document.getElementById('leveltext').textContent='Level '+state.level+' · '+treeNames[Math.max(0,unlocks.findLastIndex(n=>state.level>=n))];
+ save();
+}
+updateUI();
 
- renderer=new THREE.WebGLRenderer({canvas,antialias:true});
- renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
- renderer.shadowMap.enabled=true;
- renderer.shadowMap.type=THREE.PCFSoftShadowMap;
- renderer.outputColorSpace=THREE.SRGBColorSpace;
-
- scene.add(new THREE.HemisphereLight(0xa9b9ad,0x18231a,1.5));
-
- const light=new THREE.DirectionalLight(0xd6e4c4,2.4);
- light.position.set(-5,10,6);
- light.castShadow=true;
- light.shadow.mapSize.set(1024,1024);
- scene.add(light);
-
- makeBackground();
-
- // Waldboden
- const ground=new THREE.Mesh(
-  new THREE.CircleGeometry(40,64),
-  mat(0x1d3022)
- );
- ground.rotation.x=-Math.PI/2;
- ground.position.y=-.45;
- ground.receiveShadow=true;
- scene.add(ground);
-
- // Runde Insel
- const island=new THREE.Mesh(
-  new THREE.CylinderGeometry(5,5.2,.55,64),
-  mat(0x30452d)
- );
- island.position.y=-.28;
- island.receiveShadow=true;
- island.castShadow=true;
- scene.add(island);
-
- // Grasbüschel
- for(let i=0;i<100;i++){
-  const a=Math.random()*Math.PI*2;
-  const r=1+Math.random()*4.5;
-  const blade=new THREE.Mesh(
-   new THREE.ConeGeometry(.035,.25,5),
-   mat(i%2?0x3d5a31:0x526d3a)
-  );
-  blade.position.set(Math.cos(a)*r,-.02,Math.sin(a)*r);
-  blade.rotation.z=(Math.random()-.5)*.5;
-  scene.add(blade);
+function waterTree(){
+ const power=cans[state.can].power;
+ state.xp+=power;
+ state.coins+=5;
+ while(state.xp>=100){
+  state.xp-=100;
+  state.level++;
+  document.getElementById('message').textContent='🎉 Neues Level! Dein Baum beginnt von vorne!';
  }
-
- // Steine
- for(let i=0;i<16;i++){
-  const a=i*2.1,r=3.2+Math.random()*1.5;
-  const rock=new THREE.Mesh(
-   new THREE.DodecahedronGeometry(.15+Math.random()*.16),
-   mat(0x59604b)
-  );
-  rock.position.set(Math.cos(a)*r,-.02,Math.sin(a)*r);
-  rock.castShadow=true;
-  scene.add(rock);
- }
-
  makeTree();
- makeCan();
- makeWaterStream();
- resize();
-
- canvas.addEventListener("pointerdown",e=>{
-  dragging=true;lastX=e.clientX;lastY=e.clientY;
-  canvas.setPointerCapture(e.pointerId);
- });
- canvas.addEventListener("pointermove",e=>{
-  if(!dragging)return;
-  angle-=(e.clientX-lastX)*.008;
-  height=Math.max(2.8,Math.min(8,height+(e.clientY-lastY)*.012));
-  lastX=e.clientX;lastY=e.clientY;
- });
- canvas.addEventListener("pointerup",()=>dragging=false);
- canvas.addEventListener("pointercancel",()=>dragging=false);
-
- animate();
+ waterEffect();
+ updateUI();
 }
+document.getElementById('water').addEventListener('click',waterTree);
 
-function resize(){
- if(!renderer)return;
- const w=canvas.clientWidth;
- const h=canvas.clientHeight;
- renderer.setSize(w,h,false);
- camera.aspect=w/h;
- camera.updateProjectionMatrix();
+function closePanels(){
+ document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
 }
-window.addEventListener("resize",resize);
+window.closePanels=closePanels;
+
+function showPanel(id){
+ closePanels();
+ document.getElementById(id).style.display='block';
+}
+document.getElementById('shopBtn').onclick=()=>{
+ const el=document.getElementById('shopItems');
+ el.innerHTML='';
+ cans.forEach((c,i)=>{
+  const owned=state.owned.includes(i);
+  const div=document.createElement('div');
+  div.className='item';
+  div.innerHTML=`<div><b>${c.name}</b><br><small>${c.power} XP pro Gießen · ${c.price} Münzen</small></div>`;
+  const btn=document.createElement('button');
+  btn.textContent=owned?(state.can===i?'Ausgerüstet':'Ausrüsten'):'Kaufen';
+  btn.onclick=()=>{
+   if(owned){state.can=i;}
+   else if(state.coins>=c.price){
+    state.coins-=c.price;
+    state.owned.push(i);
+    state.can=i;
+   }else{
+    document.getElementById('message').textContent='Du hast noch nicht genug Münzen!';
+    return;
+   }
+   updateUI();
+   document.getElementById('shopBtn').click();
+  };
+  div.appendChild(btn);el.appendChild(div);
+ });
+ showPanel('shop');
+};
+document.getElementById('inventoryBtn').onclick=()=>{
+ const el=document.getElementById('inventoryItems');
+ el.innerHTML='';
+ state.owned.forEach(i=>{
+  const div=document.createElement('div');
+  div.className='item';
+  div.innerHTML=`<b>💧 ${cans[i].name}</b>`;
+  const btn=document.createElement('button');
+  btn.textContent=state.can===i?'Ausgerüstet':'Ausrüsten';
+  btn.onclick=()=>{state.can=i;updateUI();document.getElementById('inventoryBtn').click()};
+  div.appendChild(btn);el.appendChild(div);
+ });
+ showPanel('inventory');
+};
+document.getElementById('treesBtn').onclick=()=>{
+ const el=document.getElementById('treeItems');
+ el.innerHTML='';
+ treeNames.forEach((name,i)=>{
+  const unlocked=state.level>=unlocks[i];
+  const div=document.createElement('div');
+  div.className='item';
+  div.innerHTML=`<b>${unlocked?'🌳':'🔒'} ${name}</b><span>Level ${unlocks[i]}</span>`;
+  el.appendChild(div);
+ });
+ showPanel('trees');
+};
 
 function animate(){
  requestAnimationFrame(animate);
- if(!scene)return;
-
- const time=performance.now()*.001;
-
- camera.position.set(Math.sin(angle)*9,height,Math.cos(angle)*9);
- camera.lookAt(0,2.1,0);
-
- if(treeGroup){
-  treeGroup.rotation.y=Math.sin(time*.25)*.018;
+ if(waterTimer>0){
+  waterTimer-=.025;
+  if(waterLine)waterLine.visible=waterTimer>0;
  }
-
- if(canGroup){
-  canGroup.position.y=.12+(watering?Math.sin(time*15)*.035:0);
-  canGroup.rotation.z=watering?-.13+Math.sin(time*15)*.025:0;
- }
-
- for(let i=waterParticles.length-1;i>=0;i--){
-  const p=waterParticles[i];
-  p.progress+=.045;
-
-  const t=Math.min(p.progress,1);
-  p.mesh.position.lerpVectors(p.start,p.end,t);
-  p.mesh.position.y+=Math.sin(t*Math.PI)*p.arc;
-
-  if(t>=1){
-   scene.remove(p.mesh);
-   waterParticles.splice(i,1);
-  }
- }
-
- if(stream&&watering){
-  stream.material.opacity=.65+Math.sin(time*20)*.2;
- }
-
  renderer.render(scene,camera);
 }
+animate();
 
-function rebuild(){
- if(treeGroup)scene.remove(treeGroup);
- if(canGroup)scene.re
+addEventListener('resize',()=>{
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+</body>
+</html>
